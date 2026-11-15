@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emailsaty — إيميلاتي | بريد مؤقت ذكي ومتعدد</title>
+  <title>Emailsaty — إيميلاتي | بريد مؤقت متعدد وذكي</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -27,14 +27,6 @@
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
     body { font-family: 'Cairo', sans-serif; }
     .ltr-text { direction: ltr; text-align: left; }
-    .pulse-ring {
-      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-    }
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.05); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.8; }
-    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
@@ -50,7 +42,7 @@
           <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-2">
             Emailsaty <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">إيميلاتي</span>
           </h1>
-          <p class="text-xs text-slate-400">بريد مؤقت خاص وآمن 24/7 مع إشعارات تليجرام الفورية</p>
+          <p class="text-xs text-slate-400">بريد مؤقت خاص متعدد 24/7 مع إشعارات تليجرام الفورية</p>
         </div>
       </div>
 
@@ -73,10 +65,13 @@
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">عنوان البريد النشط حالياً</span>
           <div class="flex items-center gap-3 mt-1">
             <span id="activeEmailDisplay" class="ltr-text text-xl md:text-2xl font-black text-indigo-400 tracking-wide select-all">
-              جاري توليد البريد...
+              جاري تجهيز البريد...
             </span>
             <span id="eduBadge" class="hidden text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md font-bold">
-              <i class="fa-solid fa-graduation-cap ml-1"></i>طالب .EDU
+              <i class="fa-solid fa-graduation-cap ml-1"></i>جامعي .EDU
+            </span>
+            <span id="providerBadge" class="text-[11px] bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded font-mono">
+              mail.tm
             </span>
           </div>
         </div>
@@ -109,7 +104,7 @@
             <i class="fa-solid fa-layer-group text-indigo-400"></i>
             صناديق البريد المحفوظة (<span id="inboxCount">1</span>)
           </span>
-          <span class="text-[11px] text-slate-500">يتم حفظ جميع الإيميلات تلقائياً ولن تفقد أي رسالة سابقة</span>
+          <span class="text-[11px] text-slate-500">يتم فحص جميع الإيميلات بالتوازي وتصلك الرسائل حتى لو طلبت إيميل جديد</span>
         </div>
         <div id="inboxList" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
           <!-- Dynamic Pills -->
@@ -125,14 +120,14 @@
         <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
           <h2 class="text-sm font-bold text-white flex items-center gap-2">
             <i class="fa-solid fa-inbox text-indigo-400"></i>
-            الوارد (<span id="msgCount">0</span>)
+            صندوق الوارد (<span id="msgCount">0</span>)
           </h2>
           <div class="flex items-center gap-2">
             <span class="relative flex h-2.5 w-2.5">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            <span class="text-[11px] text-emerald-400 font-bold">مراقبة حية</span>
+            <span class="text-[11px] text-emerald-400 font-bold">مراقبة حية (تحديث تلقائي)</span>
           </div>
         </div>
 
@@ -185,7 +180,7 @@
                 <span class="font-bold text-slate-300">من:</span>
                 <span id="readSender" class="ltr-text font-mono text-indigo-400">sender@example.com</span>
               </div>
-              <span id="readTime" class="text-slate-500">منذ دقيقة</span>
+              <span id="readTime" class="text-slate-500">الآن</span>
             </div>
           </div>
 
@@ -252,16 +247,14 @@
 
   <!-- Core App Logic -->
   <script>
-    // State
-    const STORAGE_KEY_INBOXES = 'emailsaty_inboxes_v1';
-    const STORAGE_KEY_ACTIVE = 'emailsaty_active_addr';
-    const STORAGE_KEY_TG = 'emailsaty_tg_settings';
+    const STORAGE_KEY_INBOXES = 'emailsaty_inboxes_v2';
+    const STORAGE_KEY_ACTIVE = 'emailsaty_active_addr_v2';
+    const STORAGE_KEY_TG = 'emailsaty_tg_settings_v2';
 
     let inboxes = JSON.parse(localStorage.getItem(STORAGE_KEY_INBOXES) || '[]');
     let activeAddress = localStorage.getItem(STORAGE_KEY_ACTIVE) || '';
     let tgSettings = JSON.parse(localStorage.getItem(STORAGE_KEY_TG) || '{"chatId":"","botToken":"8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4"}');
     
-    let currentMessages = [];
     let deliveredMessageIds = new Set();
     let pollInterval = null;
     let countdown = 5;
@@ -269,6 +262,7 @@
     // DOM Elements
     const activeEmailDisplay = document.getElementById('activeEmailDisplay');
     const eduBadge = document.getElementById('eduBadge');
+    const providerBadge = document.getElementById('providerBadge');
     const copyEmailBtn = document.getElementById('copyEmailBtn');
     const newRandomBtn = document.getElementById('newRandomBtn');
     const newEduBtn = document.getElementById('newEduBtn');
@@ -302,9 +296,7 @@
     const testTgBtn = document.getElementById('testTgBtn');
     const tgStatusText = document.getElementById('tgStatusText');
 
-    // Init
     async function init() {
-      // Load query params if passed (e.g. ?chat_id=123)
       const params = new URLSearchParams(window.location.search);
       if (params.get('chat_id')) {
         tgSettings.chatId = params.get('chat_id');
@@ -314,7 +306,7 @@
       updateTgStatus();
 
       if (inboxes.length === 0) {
-        await createRandomInbox();
+        await createRandomInbox(false);
       } else {
         const found = inboxes.find(i => i.address === activeAddress) || inboxes[0];
         setActiveInbox(found.address);
@@ -334,34 +326,78 @@
       }
     }
 
-    // Inbox Generation
-    async function createRandomInbox(isEdu = false) {
-      const username = isEdu ? `student_${Math.random().toString(36).substring(2, 9)}` : `user_${Math.random().toString(36).substring(2, 9)}`;
-      let domain = '1secmail.com';
+    // Engine: Mail.tm
+    async function createMailTmInbox() {
+      try {
+        const dRes = await fetch('https://api.mail.tm/domains');
+        const dData = await dRes.json();
+        const domain = dData['hydra:member']?.[0]?.domain || 'fldubai.com';
 
-      if (isEdu) {
-        const eduDomains = ['student.edu.pl', 'campus.edu.vn', 'alumni.edu', 'edu.ac.id'];
-        domain = eduDomains[Math.floor(Math.random() * eduDomains.length)];
-      } else {
-        const standardDomains = ['1secmail.com', '1secmail.org', '1secmail.net', 'esiix.com', 'wwjmp.com'];
-        domain = standardDomains[Math.floor(Math.random() * standardDomains.length)];
+        const rand = Math.random().toString(36).substring(2, 10);
+        const address = `user_${rand}@${domain}`;
+        const password = `P@ss_${Math.random().toString(36).substring(2, 10)}`;
+
+        const accRes = await fetch('https://api.mail.tm/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address, password }),
+        });
+        if (!accRes.ok) throw new Error('Account create failed');
+
+        const tokRes = await fetch('https://api.mail.tm/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address, password }),
+        });
+        const tokData = await tokRes.json();
+
+        return {
+          address,
+          provider: 'mailtm',
+          token: tokData.token,
+          password,
+          createdAt: Date.now(),
+          isEdu: false,
+          messages: [],
+        };
+      } catch (err) {
+        console.warn('Mail.tm fallback to TempMailPlus:', err);
+        return createTempMailPlusInbox(false);
       }
+    }
 
+    // Engine: TempMail.plus (Supports custom domains & edu fallback)
+    function createTempMailPlusInbox(isEdu = false) {
+      const rand = Math.random().toString(36).substring(2, 9);
+      const username = isEdu ? `student_${rand}` : `user_${rand}`;
+      const domain = isEdu ? 'fexbox.org' : 'mailto.plus';
       const address = `${username}@${domain}`;
-      const newInbox = {
+
+      return {
         address,
         login: username,
         domain,
-        provider: isEdu ? 'edumail' : 'onesec',
+        provider: 'tempmailplus',
         createdAt: Date.now(),
         isEdu,
+        messages: [],
       };
+    }
+
+    async function createRandomInbox(isEdu = false) {
+      activeEmailDisplay.textContent = 'جاري التوليد...';
+      let newInbox;
+      if (isEdu) {
+        newInbox = createTempMailPlusInbox(true);
+      } else {
+        newInbox = await createMailTmInbox();
+      }
 
       inboxes.unshift(newInbox);
       localStorage.setItem(STORAGE_KEY_INBOXES, JSON.stringify(inboxes));
-      setActiveInbox(address);
+      setActiveInbox(newInbox.address);
       renderInboxPills();
-      fetchMessages();
+      pollAllInboxes();
     }
 
     function setActiveInbox(address) {
@@ -370,6 +406,8 @@
       const inbox = inboxes.find(i => i.address === address);
 
       activeEmailDisplay.textContent = address;
+      providerBadge.textContent = inbox?.provider || 'mail.tm';
+
       if (inbox?.isEdu) {
         eduBadge.classList.remove('hidden');
       } else {
@@ -377,8 +415,7 @@
       }
 
       renderInboxPills();
-      resetReader();
-      fetchMessages();
+      renderCurrentMessages();
     }
 
     function renderInboxPills() {
@@ -388,6 +425,8 @@
       inboxes.forEach(ib => {
         const isActive = ib.address === activeAddress;
         const pill = document.createElement('div');
+        const unreadCount = (ib.messages || []).filter(m => !m.read).length;
+
         pill.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition whitespace-nowrap border ${
           isActive 
             ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30' 
@@ -397,6 +436,7 @@
         pill.innerHTML = `
           <i class="fa-solid ${ib.isEdu ? 'fa-graduation-cap text-emerald-300' : 'fa-envelope'}"></i>
           <span class="ltr-text">${ib.address}</span>
+          ${unreadCount > 0 ? `<span class="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">${unreadCount}</span>` : ''}
           ${inboxes.length > 1 ? `<button class="delete-btn opacity-60 hover:opacity-100 hover:text-red-400 mr-1" data-addr="${ib.address}"><i class="fa-solid fa-xmark"></i></button>` : ''}
         `;
 
@@ -416,112 +456,191 @@
     function deleteInbox(address) {
       inboxes = inboxes.filter(i => i.address !== address);
       localStorage.setItem(STORAGE_KEY_INBOXES, JSON.stringify(inboxes));
-      if (activeAddress === address) {
+      if (activeAddress === address && inboxes.length > 0) {
         setActiveInbox(inboxes[0].address);
       } else {
         renderInboxPills();
       }
     }
 
-    // Message Fetching
-    async function fetchMessages() {
-      const inbox = inboxes.find(i => i.address === activeAddress);
-      if (!inbox) return;
-
+    // Parallel Background Poller (Checks all inboxes simultaneously)
+    async function pollAllInboxes() {
       refreshIcon.classList.add('fa-spin');
       try {
-        const url = `https://www.1secmail.com/api/v1/?action=getMessages&login=${encodeURIComponent(inbox.login)}&domain=${encodeURIComponent(inbox.domain)}`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const list = await res.json();
-          processIncomingList(list);
-        }
-      } catch (e) {
-        console.error('Fetch error:', e);
+        await Promise.all(inboxes.map(inbox => fetchInboxMessages(inbox)));
       } finally {
         setTimeout(() => refreshIcon.classList.remove('fa-spin'), 600);
       }
     }
 
-    async function processIncomingList(list) {
-      msgCount.textContent = list.length;
-      if (list.length === 0) {
+    async function fetchInboxMessages(inbox) {
+      if (inbox.provider === 'mailtm') {
+        await fetchMailTm(inbox);
+      } else if (inbox.provider === 'tempmailplus') {
+        await fetchTempMailPlus(inbox);
+      }
+    }
+
+    // Mail.tm Poller
+    async function fetchMailTm(inbox) {
+      if (!inbox.token) return;
+      try {
+        const res = await fetch('https://api.mail.tm/messages', {
+          headers: { 'Authorization': `Bearer ${inbox.token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const list = data['hydra:member'] || [];
+
+        for (const item of list) {
+          const msgKey = `mailtm_${item.id}`;
+          if (!deliveredMessageIds.has(msgKey)) {
+            deliveredMessageIds.add(msgKey);
+
+            // Fetch full content
+            const detailRes = await fetch(`https://api.mail.tm/messages/${item.id}`, {
+              headers: { 'Authorization': `Bearer ${inbox.token}` },
+            });
+            if (detailRes.ok) {
+              const full = await detailRes.json();
+              const otp = extractOtp(full.text || full.intro || full.subject);
+
+              const msgObj = {
+                id: item.id,
+                from: full.from?.address || item.from?.address,
+                subject: full.subject || '(بدون عنوان)',
+                date: new Date(full.createdAt).toLocaleTimeString('ar-EG'),
+                html: full.html?.[0] || full.text,
+                text: full.text,
+                otp,
+                read: false,
+              };
+
+              inbox.messages = inbox.messages || [];
+              inbox.messages.unshift(msgObj);
+              saveAndNotify(inbox, msgObj);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Mail.tm poll error:', e);
+      }
+    }
+
+    // TempMail.plus Poller
+    async function fetchTempMailPlus(inbox) {
+      try {
+        const res = await fetch(`https://tempmail.plus/api/mails?email=${encodeURIComponent(inbox.address)}&limit=10`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const list = data.mail_list || [];
+
+        for (const item of list) {
+          const msgKey = `tmp_${item.mail_id}`;
+          if (!deliveredMessageIds.has(msgKey)) {
+            deliveredMessageIds.add(msgKey);
+
+            const detailRes = await fetch(`https://tempmail.plus/api/mails/${item.mail_id}?email=${encodeURIComponent(inbox.address)}`);
+            if (detailRes.ok) {
+              const full = await detailRes.json();
+              const otp = extractOtp(full.text || full.html || item.subject);
+
+              const msgObj = {
+                id: item.mail_id,
+                from: item.from_mail || item.from_name,
+                subject: item.subject || '(بدون عنوان)',
+                date: item.date || 'الآن',
+                html: full.html || full.text,
+                text: full.text,
+                otp,
+                read: false,
+              };
+
+              inbox.messages = inbox.messages || [];
+              inbox.messages.unshift(msgObj);
+              saveAndNotify(inbox, msgObj);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('TempMail.plus poll error:', e);
+      }
+    }
+
+    function saveAndNotify(inbox, msg) {
+      localStorage.setItem(STORAGE_KEY_INBOXES, JSON.stringify(inboxes));
+      renderInboxPills();
+
+      // If active inbox, update view immediately
+      if (inbox.address === activeAddress) {
+        renderCurrentMessages();
+        renderMessageInReader(msg);
+      }
+
+      // Play sound
+      try { chimeSound.play(); } catch {}
+
+      // Send to Telegram
+      if (tgSettings.chatId && tgSettings.botToken) {
+        sendTelegramAlert(inbox.address, msg);
+      }
+
+      // Browser Notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(`رسالة جديدة على ${inbox.address}`, {
+          body: msg.otp ? `كود التحقق: ${msg.otp}\n${msg.subject}` : msg.subject,
+          icon: 'https://cdn-icons-png.flaticon.com/512/732/732200.png'
+        });
+      }
+    }
+
+    function renderCurrentMessages() {
+      const inbox = inboxes.find(i => i.address === activeAddress);
+      const messages = inbox?.messages || [];
+      msgCount.textContent = messages.length;
+
+      if (messages.length === 0) {
         messageList.innerHTML = '';
         messageList.appendChild(emptyState);
         emptyState.classList.remove('hidden');
+        resetReader();
         return;
       }
 
       emptyState.classList.add('hidden');
       messageList.innerHTML = '';
 
-      for (const item of list) {
-        // Fetch full message if new
-        const msgKey = `${activeAddress}_${item.id}`;
-        if (!deliveredMessageIds.has(msgKey)) {
-          deliveredMessageIds.add(msgKey);
-          loadAndNotify(item);
-        }
-
+      messages.forEach((msg, idx) => {
         const card = document.createElement('div');
-        card.className = 'p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition flex flex-col gap-1';
+        card.className = `p-3 rounded-xl border cursor-pointer transition flex flex-col gap-1 ${
+          msg.read ? 'bg-slate-950/40 border-slate-800/60' : 'bg-slate-900 border-indigo-500/40 shadow-sm'
+        } hover:border-indigo-500`;
+
         card.innerHTML = `
           <div class="flex items-center justify-between text-xs">
-            <span class="font-bold text-indigo-400 ltr-text truncate max-w-[200px]">${item.from}</span>
-            <span class="text-slate-500">${item.date ? item.date.split(' ')[1] || item.date : ''}</span>
+            <span class="font-bold text-indigo-400 ltr-text truncate max-w-[200px]">${msg.from}</span>
+            <span class="text-slate-500">${msg.date}</span>
           </div>
-          <div class="text-sm font-bold text-white truncate">${item.subject || '(بدون عنوان)'}</div>
+          <div class="text-sm font-bold text-white truncate flex items-center justify-between">
+            <span>${msg.subject}</span>
+            ${msg.otp ? `<span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded border border-emerald-500/30 font-mono font-black">${msg.otp}</span>` : ''}
+          </div>
         `;
-        card.addEventListener('click', () => openMessage(item.id));
+
+        card.addEventListener('click', () => {
+          msg.read = true;
+          localStorage.setItem(STORAGE_KEY_INBOXES, JSON.stringify(inboxes));
+          renderInboxPills();
+          renderCurrentMessages();
+          renderMessageInReader(msg);
+        });
+
         messageList.appendChild(card);
-      }
-    }
+      });
 
-    async function loadAndNotify(item) {
-      const inbox = inboxes.find(i => i.address === activeAddress);
-      if (!inbox) return;
-
-      try {
-        const url = `https://www.1secmail.com/api/v1/?action=readMessage&login=${encodeURIComponent(inbox.login)}&domain=${encodeURIComponent(inbox.domain)}&id=${encodeURIComponent(item.id)}`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const full = await res.json();
-          const otp = extractOtp(full.textBody || full.body || item.subject);
-
-          // Play Sound
-          try { chimeSound.play(); } catch {}
-
-          // Push to Telegram
-          if (tgSettings.chatId && tgSettings.botToken) {
-            sendTelegramAlert(inbox.address, full, otp);
-          }
-
-          // Browser Notification
-          if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(`رسالة جديدة على ${inbox.address}`, {
-              body: otp ? `كود التحقق: ${otp}\n${full.subject}` : full.subject,
-              icon: 'https://cdn-icons-png.flaticon.com/512/732/732200.png'
-            });
-          }
-        }
-      } catch (e) {
-        console.error('Notify error:', e);
-      }
-    }
-
-    async function openMessage(id) {
-      const inbox = inboxes.find(i => i.address === activeAddress);
-      if (!inbox) return;
-
-      try {
-        const url = `https://www.1secmail.com/api/v1/?action=readMessage&login=${encodeURIComponent(inbox.login)}&domain=${encodeURIComponent(inbox.domain)}&id=${encodeURIComponent(id)}`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const full = await res.json();
-          renderMessageInReader(full);
-        }
-      } catch (e) {
-        console.error('Open msg error:', e);
+      // Automatically open the first message if reader is empty
+      if (readerContent.classList.contains('hidden') && messages.length > 0) {
+        renderMessageInReader(messages[0]);
       }
     }
 
@@ -533,21 +652,20 @@
       readSender.textContent = msg.from;
       readTime.textContent = msg.date;
 
-      const otp = extractOtp(msg.textBody || msg.body || msg.subject);
-      if (otp) {
+      if (msg.otp) {
         otpBanner.classList.remove('hidden');
-        otpCodeDisplay.textContent = otp;
-        copyOtpBtn.onclick = () => copyText(otp, copyOtpBtn);
+        otpCodeDisplay.textContent = msg.otp;
+        copyOtpBtn.onclick = () => copyText(msg.otp, copyOtpBtn);
       } else {
         otpBanner.classList.add('hidden');
       }
 
-      if (msg.htmlBody || msg.body) {
-        readBodyHtml.innerHTML = msg.htmlBody || msg.body;
+      if (msg.html) {
+        readBodyHtml.innerHTML = msg.html;
         readBodyHtml.classList.remove('hidden');
         readBodyText.classList.add('hidden');
       } else {
-        readBodyText.textContent = msg.textBody || '';
+        readBodyText.textContent = msg.text || '';
         readBodyText.classList.remove('hidden');
         readBodyHtml.classList.add('hidden');
       }
@@ -558,36 +676,26 @@
       readerContent.classList.add('hidden');
     }
 
-    // OTP Extractor
     function extractOtp(content) {
       if (!content) return null;
-      // Keywords
-      const keywordMatch = content.match(/(?:code|otp|pin|verification\s*code|security\s*code|رمز\s*التحقق|رمز\s*التأكيد|كود\s*التفعيل|كود)[\s:=—\-]+([A-Z0-9]{4,8})\b/i);
-      if (keywordMatch) return keywordMatch[1];
-
-      // G-XXXXXX
-      const gMatch = content.match(/\b([A-Z]{1,3}-\d{4,8})\b/);
-      if (gMatch) return gMatch[1];
-
-      // Standalone 6 digits
-      const sixMatch = content.match(/(?<!\d|\$|€|£)(\d{6})(?!\d)/);
-      if (sixMatch && !/^202[0-9]$/.test(sixMatch[1])) return sixMatch[1];
-
-      // Standalone 4-5 digits
-      const fourMatch = content.match(/(?<!\d)(\d{4,5})(?!\d)/);
-      if (fourMatch && !/^202[0-9]$/.test(fourMatch[1])) return fourMatch[1];
-
+      const kw = content.match(/(?:code|otp|pin|verification\s*code|security\s*code|رمز\s*التحقق|رمز\s*التأكيد|كود\s*التفعيل|كود)[\s:=—\-]+([A-Z0-9]{4,8})\b/i);
+      if (kw) return kw[1];
+      const gm = content.match(/\b([A-Z]{1,3}-\d{4,8})\b/);
+      if (gm) return gm[1];
+      const six = content.match(/(?<!\d|\$|€|£)(\d{6})(?!\d)/);
+      if (six && !/^202[0-9]$/.test(six[1])) return six[1];
+      const four = content.match(/(?<!\d)(\d{4,5})(?!\d)/);
+      if (four && !/^202[0-9]$/.test(four[1])) return four[1];
       return null;
     }
 
-    // Send Telegram Notification
-    async function sendTelegramAlert(inboxAddr, msg, otp) {
+    async function sendTelegramAlert(inboxAddr, msg) {
       const text = `📬 <b>رسالة جديدة مستلمة!</b>\n\n` +
         `📧 <b>البريد:</b> <code>${inboxAddr}</code>\n` +
         `👤 <b>المرسل:</b> <code>${msg.from}</code>\n` +
-        `📝 <b>الموضوع:</b> ${msg.subject || '(بدون عنوان)'}\n\n` +
-        (otp ? `🔑 <b>كود التحقق (OTP):</b>\n<code>${otp}</code>\n\n` : '') +
-        `💡 <i>تم الاستلام عبر Emailsaty Web Dashboard</i>`;
+        `📝 <b>الموضوع:</b> ${msg.subject}\n\n` +
+        (msg.otp ? `🔑 <b>كود التحقق (OTP):</b>\n<code>${msg.otp}</code>\n\n` : '') +
+        `💡 <i>تم الاستلام عبر Emailsaty Web App</i>`;
 
       try {
         await fetch(`https://api.telegram.org/bot${tgSettings.botToken}/sendMessage`, {
@@ -604,7 +712,6 @@
       }
     }
 
-    // Polling Loop
     function startPolling() {
       if (pollInterval) clearInterval(pollInterval);
       countdown = 5;
@@ -613,12 +720,11 @@
         refreshTimer.textContent = `${countdown}s`;
         if (countdown <= 0) {
           countdown = 5;
-          fetchMessages();
+          pollAllInboxes();
         }
       }, 1000);
     }
 
-    // Clipboard Copy
     async function copyText(text, btn) {
       await navigator.clipboard.writeText(text);
       const original = btn.innerHTML;
@@ -626,13 +732,12 @@
       setTimeout(() => btn.innerHTML = original, 1800);
     }
 
-    // Event Listeners
     copyEmailBtn.addEventListener('click', () => copyText(activeAddress, copyEmailBtn));
     newRandomBtn.addEventListener('click', () => createRandomInbox(false));
     newEduBtn.addEventListener('click', () => createRandomInbox(true));
-    refreshBtn.addEventListener('click', () => { countdown = 5; fetchMessages(); });
+    refreshBtn.addEventListener('click', () => { countdown = 5; pollAllInboxes(); });
 
-    // Telegram Modal Listeners
+    // Telegram Modal
     tgModalBtn.addEventListener('click', () => {
       tgChatIdInput.value = tgSettings.chatId;
       tgBotTokenInput.value = tgSettings.botToken;
@@ -679,7 +784,6 @@
       }
     });
 
-    // Request notification permission on first interaction
     document.addEventListener('click', () => {
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
