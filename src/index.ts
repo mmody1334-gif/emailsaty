@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { MultiEngine } from './engines'
 import { InboxStore } from './store/inbox-store'
+import { defaultSmsEngine, SmsEngine } from './numbers/sms-engine'
+import { SupportedService } from './numbers/types'
 
 export interface Env {
   EMAILSATY_STORAGE: KVNamespace
@@ -104,6 +106,80 @@ app.get('/api/inbox/:address/messages', async (c) => {
   }
 })
 
+// Numbers API: Countries & Free numbers
+app.get('/api/numbers/countries', (c) => c.json({ ok: true, countries: defaultSmsEngine.getCountries() }))
+app.get('/api/numbers/free', (c) => c.json({ ok: true, numbers: defaultSmsEngine.getFreePublicNumbers() }))
+
+// Numbers API: Request a phone number for WhatsApp / Google / Facebook
+app.post('/api/numbers/request', async (c) => {
+  const body = await c.req.json().catch(() => ({}))
+  const service = (body.service || 'whatsapp') as SupportedService
+  const country = body.country || 'id'
+  const chatId = body.chatId || 736161596
+
+  try {
+    const order = await defaultSmsEngine.requestNumber(service, country, chatId)
+    const store = new InboxStore(c.env.EMAILSATY_STORAGE as any)
+    await (c.env.EMAILSATY_STORAGE as any).put(`order:${order.orderId}`, JSON.stringify(order), { expirationTtl: 1800 })
+
+    const botToken = c.env.BOT_TOKEN || '8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4'
+    const notifyText =
+      `📱 <b>تم حجز رقم تفعيل جديد!</b>\n\n` +
+      `🎯 <b>الخدمة:</b> <code>${service.toUpperCase()}</code>\n` +
+      `🌍 <b>الدولة:</b> ${order.country}\n` +
+      `📞 <b>الرقم:</b>\n<code>${order.phoneNumber}</code>\n\n` +
+      `⏳ <i>أدخل الرقم في التطبيق واطلب كود SMS. سيظهر الكود هنا فوراً.</i>`
+
+    await sendTelegram(botToken, chatId, notifyText)
+
+    return c.json({ ok: true, order })
+  } catch (err: any) {
+    return c.json({ ok: false, error: err.message }, 500)
+  }
+})
+
+// Numbers API: Check SMS status for an active order
+app.get('/api/numbers/:orderId/check', async (c) => {
+  const orderId = c.req.param('orderId')
+  const raw = await (c.env.EMAILSATY_STORAGE as any).get(`order:${orderId}`)
+  if (!raw) return c.json({ ok: false, error: 'Order not found or expired' }, 404)
+
+  const order = JSON.parse(raw)
+  return c.json({ ok: true, order })
+})
+
+// Numbers API: Simulate receiving SMS (for manual/webhook delivery)
+app.post('/api/numbers/:orderId/receive', async (c) => {
+  const orderId = c.req.param('orderId')
+  const body = await c.req.json().catch(() => ({}))
+  const smsText = body.text || 'Your WhatsApp code: 492-108'
+
+  const raw = await (c.env.EMAILSATY_STORAGE as any).get(`order:${orderId}`)
+  if (!raw) return c.json({ ok: false, error: 'Order not found' }, 404)
+
+  const order = JSON.parse(raw)
+  const code = SmsEngine.extractSmsCode(smsText, order.service)
+
+  order.status = 'RECEIVED'
+  order.smsCode = code
+  order.smsText = smsText
+  await (c.env.EMAILSATY_STORAGE as any).put(`order:${orderId}`, JSON.stringify(order), { expirationTtl: 1800 })
+
+  const botToken = c.env.BOT_TOKEN || '8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4'
+  if (order.chatId) {
+    const alertText =
+      `🎉 <b>تم استلام كود تفعيل SMS!</b>\n\n` +
+      `📱 <b>الرقم:</b> <code>${order.phoneNumber}</code>\n` +
+      `🎯 <b>الخدمة:</b> <code>${order.service.toUpperCase()}</code>\n\n` +
+      (code ? `🔑 <b>كود التفعيل (OTP):</b>\n<code>${code}</code>\n\n` : '') +
+      `💬 <b>نص الرسالة:</b>\n${smsText}`
+
+    await sendTelegram(botToken, order.chatId, alertText)
+  }
+
+  return c.json({ ok: true, order })
+})
+
 // 4. Telegram Webhook: Handles /start, /new, /edu, /inboxes
 app.post('/telegram/webhook', async (c) => {
   const update = await c.req.json().catch(() => ({}))
@@ -117,17 +193,59 @@ app.post('/telegram/webhook', async (c) => {
 
   if (text === '/start' || text === '/help') {
     const welcome =
-      `👋 <b>أهلاً بك في بوت إيميلاتي (Emailsaty)!</b>\n\n` +
-      `⚡ يمكنك إنشاء بريد مؤقت فوري ونظيف يقبله فيسبوك وجوجل وإنستاجرام.\n\n` +
-      `📌 <b>الأوامر المتاحة:</b>\n` +
-      `• <code>/new</code> : توليد إيميل عشوائي جديد معتمد وموثق.\n` +
-      `• <code>/edu</code> : توليد إيميل جامعي <code>.EDU</code> للتحقق الطلابي.\n` +
-      `• <code>/inboxes</code> : عرض جميع إيميلاتك السابقة المحفوظة.\n` +
-      `• <code>/check</code> : فحص صندوق الوارد الآن.\n\n` +
-      `🌐 <b>لوحة التحكم المباشرة (GitHub Pages):</b>\n` +
+      `👋 <b>أهلاً بك في بوت إيميلاتي وأرقام التفعيل (Emailsaty)!</b>\n\n` +
+      `⚡ المنظومة المتكاملة للبريد المؤقت النظيف وأرقام تفعيل SMS لواتساب وجوجل.\n\n` +
+      `📌 <b>أوامر الإيميلات:</b>\n` +
+      `• <code>/new</code> : توليد إيميل معتمد لفيسبوك وجوجل.\n` +
+      `• <code>/edu</code> : توليد إيميل جامعي <code>.EDU</code>.\n` +
+      `• <code>/inboxes</code> : عرض جميع إيميلاتك السابقة.\n\n` +
+      `📱 <b>أوامر أرقام التفعيل:</b>\n` +
+      `• <code>/wa</code> : حجز رقم واتساب فوري (شريحة خلوية حقيقية).\n` +
+      `• <code>/google</code> : حجز رقم تفعيل حسابات جوجل.\n` +
+      `• <code>/free</code> : عرض أرقام مجانية عامة.\n\n` +
+      `🌐 <b>لوحة التحكم الشاملة (تطبيق الويب):</b>\n` +
       `https://mmody1334-gif.github.io/emailsaty/`
 
     await sendTelegram(botToken, chatId, welcome)
+    return c.json({ ok: true })
+  }
+
+  if (text === '/wa' || text.startsWith('/number whatsapp')) {
+    await sendTelegram(botToken, chatId, '⏳ جاري حجز رقم واتساب خلوى نشط (إندونيسيا 99% نجاح)...')
+    try {
+      const order = await defaultSmsEngine.requestNumber('whatsapp', 'id', chatId)
+      await (c.env.EMAILSATY_STORAGE as any).put(`order:${order.orderId}`, JSON.stringify(order), { expirationTtl: 1800 })
+
+      const reply =
+        `📱 <b>تم حجز رقم واتساب بنجاح!</b>\n\n` +
+        `📞 <b>الرقم:</b>\n<code>${order.phoneNumber}</code>\n` +
+        `🌍 <b>الدولة:</b> ${order.country} (${order.dialCode})\n` +
+        `⏱️ <b>الصلاحية:</b> 15 دقيقة\n\n` +
+        `💡 <i>انسخ الرقم وضعه في واتساب واطلب كود SMS. سيصلك الكود هنا فوراً.</i>`
+
+      await sendTelegram(botToken, chatId, reply)
+    } catch (e: any) {
+      await sendTelegram(botToken, chatId, `❌ فشل حجز الرقم: ${e.message}`)
+    }
+    return c.json({ ok: true })
+  }
+
+  if (text === '/google' || text.startsWith('/number google')) {
+    await sendTelegram(botToken, chatId, '⏳ جاري حجز رقم تفعيل جوجل...')
+    try {
+      const order = await defaultSmsEngine.requestNumber('google', 'us', chatId)
+      await (c.env.EMAILSATY_STORAGE as any).put(`order:${order.orderId}`, JSON.stringify(order), { expirationTtl: 1800 })
+
+      const reply =
+        `📱 <b>تم حجز رقم جوجل بنجاح!</b>\n\n` +
+        `📞 <b>الرقم:</b>\n<code>${order.phoneNumber}</code>\n` +
+        `🌍 <b>الدولة:</b> ${order.country}\n\n` +
+        `💡 <i>أدخل الرقم في جوجل وسيصلك كود G-XXXXXX هنا فوراً.</i>`
+
+      await sendTelegram(botToken, chatId, reply)
+    } catch (e: any) {
+      await sendTelegram(botToken, chatId, `❌ فشل حجز الرقم: ${e.message}`)
+    }
     return c.json({ ok: true })
   }
 

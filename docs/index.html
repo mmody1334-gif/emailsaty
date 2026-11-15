@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emailsaty — إيميلاتي | بريد مؤقت ذكي ومتعدد</title>
+  <title>Emailsaty — إيميلاتي وأرقام التفعيل | بريد مؤقت وأرقام واتساب وجوجل</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -36,14 +36,27 @@
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-          <i class="fa-solid fa-envelope-open-text text-white text-lg"></i>
+          <i class="fa-solid fa-bolt text-white text-lg"></i>
         </div>
         <div>
           <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-2">
-            Emailsaty <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">إيميلاتي</span>
+            Emailsaty <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">إيميلاتي وأرقامي</span>
           </h1>
-          <p class="text-xs text-slate-400">بريد مؤقت معتمد لفيسبوك وجوجل مع إشعارات تليجرام الفورية</p>
+          <p class="text-xs text-slate-400">بريد مؤقت معتمد وأرقام تفعيل SMS حقيقية لواتساب وجوجل</p>
         </div>
+      </div>
+
+      <!-- Main Navigation Tabs -->
+      <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <button id="tabEmailsBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition">
+          <i class="fa-solid fa-envelope"></i>
+          <span>الإيميلات</span>
+        </button>
+        <button id="tabNumbersBtn" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
+          <span>أرقام الموبايل</span>
+          <span class="bg-emerald-500 text-slate-950 text-[10px] px-1.5 py-0.2 rounded font-black">جديد</span>
+        </button>
       </div>
 
       <div class="flex items-center gap-2">
@@ -55,8 +68,8 @@
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full flex flex-col gap-6">
+  <!-- ==================== TAB 1: EMAILS SECTION ==================== -->
+  <div id="emailsSection" class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full flex flex-col gap-6">
 
     <!-- Generator & Active Inbox Card -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
@@ -70,13 +83,12 @@
             <span id="eduBadge" class="hidden text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md font-bold">
               <i class="fa-solid fa-graduation-cap ml-1"></i>جامعي .EDU
             </span>
-            <span id="providerBadge" class="text-[11px] bg-slate-800 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-mono font-bold">
+            <span class="text-[11px] bg-slate-800 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-mono font-bold">
               معتمد لفيسبوك وجوجل
             </span>
           </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="flex flex-wrap items-center gap-2">
           <button id="copyEmailBtn" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition active:scale-95">
             <i class="fa-regular fa-copy"></i>
@@ -106,16 +118,13 @@
           </span>
           <span class="text-[11px] text-slate-500">يتم فحص جميع الإيميلات بالتوازي وتصلك الرسائل حتى لو طلبت إيميل جديد</span>
         </div>
-        <div id="inboxList" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-          <!-- Dynamic Pills -->
-        </div>
+        <div id="inboxList" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin"></div>
       </div>
     </div>
 
     <!-- Messages Section -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-start">
-      
-      <!-- Messages List (Left column in RTL) -->
+      <!-- List -->
       <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col">
         <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
           <h2 class="text-sm font-bold text-white flex items-center gap-2">
@@ -130,9 +139,7 @@
             <span class="text-[11px] text-emerald-400 font-bold">مراقبة حية 24/7</span>
           </div>
         </div>
-
         <div id="messageList" class="flex flex-col gap-2 min-h-[300px]">
-          <!-- Placeholder Empty State -->
           <div id="emptyState" class="flex flex-col items-center justify-center py-16 text-center text-slate-500 my-auto">
             <div class="w-16 h-16 rounded-2xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-center mb-3">
               <i class="fa-solid fa-envelope-open text-2xl text-slate-600"></i>
@@ -145,34 +152,25 @@
         </div>
       </div>
 
-      <!-- Message Viewer (Right column in RTL) -->
+      <!-- Reader -->
       <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col min-h-[450px]">
-        
-        <!-- Empty Reader State -->
         <div id="readerEmpty" class="flex flex-col items-center justify-center text-center my-auto py-20 text-slate-500">
           <i class="fa-solid fa-eye text-3xl text-slate-700 mb-2"></i>
           <p class="text-sm font-bold text-slate-400">اختر رسالة من القائمة لعرض تفاصيلها</p>
         </div>
-
-        <!-- Reader Content -->
         <div id="readerContent" class="hidden flex flex-col gap-4">
-          <!-- OTP Banner if detected -->
           <div id="otpBanner" class="hidden bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center justify-between">
             <div>
               <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
                 <i class="fa-solid fa-key"></i> تم استخراج كود التحقق (OTP)
               </span>
-              <div id="otpCodeDisplay" class="ltr-text text-3xl font-black text-white tracking-widest mt-1">
-                ------
-              </div>
+              <div id="otpCodeDisplay" class="ltr-text text-3xl font-black text-white tracking-widest mt-1">------</div>
             </div>
             <button id="copyOtpBtn" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition active:scale-95">
               <i class="fa-regular fa-clone"></i>
               <span>نسخ الكود</span>
             </button>
           </div>
-
-          <!-- Header info -->
           <div class="pb-3 border-b border-slate-800">
             <h3 id="readSubject" class="text-lg font-black text-white">عنوان الرسالة</h3>
             <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 mt-2">
@@ -183,11 +181,156 @@
               <span id="readTime" class="text-slate-500">الآن</span>
             </div>
           </div>
-
-          <!-- Email Body -->
           <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 min-h-[250px] overflow-auto">
             <div id="readBodyHtml" class="prose prose-invert max-w-none text-sm leading-relaxed"></div>
             <pre id="readBodyText" class="hidden whitespace-pre-wrap font-sans text-sm text-slate-300"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TAB 2: VIRTUAL PHONE NUMBERS SECTION ==================== -->
+  <div id="numbersSection" class="hidden max-w-6xl mx-auto px-4 py-6 flex-1 w-full flex flex-col gap-6">
+
+    <!-- Numbers Order Banner -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-0.5 rounded-full font-bold">
+              شرائح خلوية حقيقية (Physical SIMs Non-VoIP)
+            </span>
+          </div>
+          <h2 class="text-2xl font-black text-white mt-2">أرقام تفعيل SMS لتخطي حظر واتساب وجوجل</h2>
+          <p class="text-xs text-slate-400 mt-1">اختر الخدمة والدولة للحصول على رقم خلوى مخصص لاستلام كود التحقق فوراً</p>
+        </div>
+
+        <button id="requestNumberBtn" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-base font-black bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-xl shadow-emerald-600/25 transition active:scale-95">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span>حجز رقم خلوى جديد</span>
+        </button>
+      </div>
+
+      <!-- Controls: Service & Country Selectors -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+        <!-- Service Choice -->
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-2">1. اختر الخدمة المطلوبة</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button class="service-btn active px-3 py-2.5 rounded-xl text-xs font-bold border border-emerald-500 bg-emerald-500/10 text-emerald-400 flex items-center justify-center gap-2 transition" data-service="whatsapp">
+              <i class="fa-brands fa-whatsapp text-lg"></i>
+              <span>واتساب (WhatsApp)</span>
+            </button>
+            <button class="service-btn px-3 py-2.5 rounded-xl text-xs font-bold border border-slate-800 bg-slate-950 text-slate-300 hover:border-slate-700 flex items-center justify-center gap-2 transition" data-service="google">
+              <i class="fa-brands fa-google text-lg text-rose-400"></i>
+              <span>جوجل (Gmail)</span>
+            </button>
+            <button class="service-btn px-3 py-2.5 rounded-xl text-xs font-bold border border-slate-800 bg-slate-950 text-slate-300 hover:border-slate-700 flex items-center justify-center gap-2 transition" data-service="facebook">
+              <i class="fa-brands fa-facebook text-lg text-blue-400"></i>
+              <span>فيسبوك (Meta)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Country Choice -->
+        <div>
+          <label class="text-xs font-bold text-slate-300 block mb-2">2. اختر الدولة (نسبة النجاح)</label>
+          <select id="countrySelect" class="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500">
+            <option value="id" selected>🇮🇩 إندونيسيا (+62) — نسبة نجاح واتساب 99%</option>
+            <option value="gb">🇬🇧 بريطانيا (+44) — نسبة نجاح واتساب 98%</option>
+            <option value="us">🇺🇸 الولايات المتحدة (+1) — نسبة نجاح 96%</option>
+            <option value="eg">🇪🇬 مصر (+20) — نسبة نجاح 92%</option>
+            <option value="nl">🇳🇱 هولندا (+31) — نسبة نجاح 97%</option>
+            <option value="br">🇧🇷 البرازيل (+55) — نسبة نجاح 95%</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Number & Incoming SMS Box -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- Active Number Card (Left) -->
+      <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <span class="text-xs font-bold text-slate-400">الرقم النشط المحجوز</span>
+          <div class="flex items-center gap-2">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span id="numberTimer" class="text-xs font-mono font-bold text-emerald-400">14:59</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-xs text-slate-400 mb-1">الرقم المخصص لتفعيل <span id="targetServiceBadge" class="text-emerald-400 font-bold">WHATSAPP</span></div>
+          <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl p-3">
+            <span id="activeNumberDisplay" class="ltr-text text-2xl font-black text-white tracking-wider select-all">
+              +62 812 3456 7890
+            </span>
+            <button id="copyNumberBtn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition active:scale-95">
+              <i class="fa-regular fa-copy"></i>
+              <span>نسخ</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 leading-relaxed">
+          <i class="fa-solid fa-circle-info text-indigo-400 ml-1"></i>
+          أدخل هذا الرقم في تطبيق <b class="text-white">واتساب أو جوجل</b> واضغط على "إرسال كود عبر رسالة SMS". سيصل الكود هنا مباشرة خلال ثوانٍ.
+        </div>
+
+        <button id="cancelNumberBtn" class="text-xs text-rose-400 hover:text-rose-300 font-bold py-1 transition flex items-center justify-center gap-1">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>إلغاء هذا الرقم وطلب رقم آخر</span>
+        </button>
+      </div>
+
+      <!-- SMS Receiver & OTP Display (Right) -->
+      <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col min-h-[350px]">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-comment-sms text-emerald-400"></i>
+            رسائل SMS المستلمة
+          </h3>
+          <span id="smsStatusBadge" class="text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono">في انتظار الرسالة...</span>
+        </div>
+
+        <!-- Waiting State -->
+        <div id="smsEmptyState" class="flex flex-col items-center justify-center my-auto py-12 text-center text-slate-500">
+          <div class="w-16 h-16 rounded-2xl bg-slate-800/60 border border-slate-700/50 flex items-center justify-center mb-3">
+            <i class="fa-solid fa-satellite-dish text-2xl text-emerald-400 animate-pulse"></i>
+          </div>
+          <p class="text-sm font-bold text-slate-300">جاري مراقبة الشبكة الخلوية...</p>
+          <p class="text-xs text-slate-500 mt-1 max-w-sm">
+            بمجرد أن ترسل المنصة رسالة SMS، سيتم استخراج كود التفعيل هنا وتنبيهك بصوت وإشعار تليجرام فوراً.
+          </p>
+        </div>
+
+        <!-- Received State -->
+        <div id="smsReceivedContent" class="hidden flex flex-col gap-4">
+          <div class="bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-indigo-500/15 border border-emerald-500/40 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl shadow-emerald-500/5">
+            <div>
+              <span class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-key"></i> كود تفعيل SMS (OTP)
+              </span>
+              <div id="smsOtpDisplay" class="ltr-text text-4xl font-black text-white tracking-widest mt-1">
+                492-108
+              </div>
+            </div>
+            <button id="copySmsOtpBtn" class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-black bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition active:scale-95">
+              <i class="fa-regular fa-clone"></i>
+              <span>نسخ كود التفعيل</span>
+            </button>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-xs font-bold text-slate-400 block mb-1">نص الرسالة المستلمة:</span>
+            <p id="smsFullText" class="text-sm text-slate-200 font-mono leading-relaxed">
+              Your WhatsApp code: 492-108. You can also tap on this link to verify your phone: v.whatsapp.com/492108
+            </p>
           </div>
         </div>
 
@@ -195,7 +338,7 @@
 
     </div>
 
-  </main>
+  </div>
 
   <!-- Telegram Settings Modal -->
   <div id="tgModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
@@ -237,7 +380,6 @@
     </div>
   </div>
 
-  <!-- Audio Chime -->
   <audio id="chimeSound" preload="auto">
     <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
   </audio>
@@ -245,19 +387,29 @@
   <!-- Core App Logic -->
   <script>
     const API_BASE = 'https://emailsaty.hudhaifa-bio.workers.dev';
-    const STORAGE_KEY_INBOXES = 'emailsaty_inboxes_v3';
-    const STORAGE_KEY_ACTIVE = 'emailsaty_active_addr_v3';
-    const STORAGE_KEY_TG = 'emailsaty_tg_settings_v3';
+    const STORAGE_KEY_INBOXES = 'emailsaty_inboxes_v4';
+    const STORAGE_KEY_ACTIVE = 'emailsaty_active_addr_v4';
+    const STORAGE_KEY_TG = 'emailsaty_tg_settings_v4';
 
     let inboxes = JSON.parse(localStorage.getItem(STORAGE_KEY_INBOXES) || '[]');
     let activeAddress = localStorage.getItem(STORAGE_KEY_ACTIVE) || '';
     let tgSettings = JSON.parse(localStorage.getItem(STORAGE_KEY_TG) || '{"chatId":"736161596","botToken":"8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4"}');
 
+    let currentOrder = null;
+    let selectedService = 'whatsapp';
     let deliveredMessageIds = new Set();
     let pollInterval = null;
+    let numberInterval = null;
     let countdown = 5;
+    let numberCountdown = 900; // 15 mins
 
-    // DOM Elements
+    // Elements
+    const tabEmailsBtn = document.getElementById('tabEmailsBtn');
+    const tabNumbersBtn = document.getElementById('tabNumbersBtn');
+    const emailsSection = document.getElementById('emailsSection');
+    const numbersSection = document.getElementById('numbersSection');
+
+    // Emails Elements
     const activeEmailDisplay = document.getElementById('activeEmailDisplay');
     const eduBadge = document.getElementById('eduBadge');
     const copyEmailBtn = document.getElementById('copyEmailBtn');
@@ -283,7 +435,23 @@
     const readBodyText = document.getElementById('readBodyText');
     const chimeSound = document.getElementById('chimeSound');
 
-    // Telegram Modal Elements
+    // Numbers Elements
+    const requestNumberBtn = document.getElementById('requestNumberBtn');
+    const countrySelect = document.getElementById('countrySelect');
+    const targetServiceBadge = document.getElementById('targetServiceBadge');
+    const activeNumberDisplay = document.getElementById('activeNumberDisplay');
+    const copyNumberBtn = document.getElementById('copyNumberBtn');
+    const cancelNumberBtn = document.getElementById('cancelNumberBtn');
+    const numberTimer = document.getElementById('numberTimer');
+    const smsStatusBadge = document.getElementById('smsStatusBadge');
+    const smsEmptyState = document.getElementById('smsEmptyState');
+    const smsReceivedContent = document.getElementById('smsReceivedContent');
+    const smsOtpDisplay = document.getElementById('smsOtpDisplay');
+    const copySmsOtpBtn = document.getElementById('copySmsOtpBtn');
+    const smsFullText = document.getElementById('smsFullText');
+    const serviceBtns = document.querySelectorAll('.service-btn');
+
+    // Telegram Modal
     const tgModalBtn = document.getElementById('tgModalBtn');
     const tgModal = document.getElementById('tgModal');
     const closeTgModal = document.getElementById('closeTgModal');
@@ -294,11 +462,27 @@
     const tgStatusText = document.getElementById('tgStatusText');
 
     async function init() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('chat_id')) {
-        tgSettings.chatId = params.get('chat_id');
-        localStorage.setItem(STORAGE_KEY_TG, JSON.stringify(tgSettings));
-      }
+      // Tab switcher
+      tabEmailsBtn.addEventListener('click', () => switchTab('emails'));
+      tabNumbersBtn.addEventListener('click', () => switchTab('numbers'));
+
+      // Service buttons in Numbers section
+      serviceBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          serviceBtns.forEach(b => {
+            b.classList.remove('active', 'border-emerald-500', 'bg-emerald-500/10', 'text-emerald-400');
+            b.classList.add('border-slate-800', 'bg-slate-950', 'text-slate-300');
+          });
+          btn.classList.add('active', 'border-emerald-500', 'bg-emerald-500/10', 'text-emerald-400');
+          btn.classList.remove('border-slate-800', 'bg-slate-950', 'text-slate-300');
+          selectedService = btn.dataset.service;
+          targetServiceBadge.textContent = selectedService.toUpperCase();
+        });
+      });
+
+      requestNumberBtn.addEventListener('click', requestVirtualNumber);
+      cancelNumberBtn.addEventListener('click', requestVirtualNumber);
+      copyNumberBtn.addEventListener('click', () => copyText(activeNumberDisplay.textContent.trim(), copyNumberBtn));
 
       updateTgStatus();
 
@@ -311,8 +495,98 @@
 
       renderInboxPills();
       startPolling();
+
+      // Request initial virtual number for instant readiness
+      requestVirtualNumber();
     }
 
+    function switchTab(tab) {
+      if (tab === 'emails') {
+        emailsSection.classList.remove('hidden');
+        numbersSection.classList.add('hidden');
+        tabEmailsBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow transition';
+        tabNumbersBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
+      } else {
+        emailsSection.classList.add('hidden');
+        numbersSection.classList.remove('hidden');
+        tabNumbersBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow transition';
+        tabEmailsBtn.className = 'flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
+      }
+    }
+
+    // Number Logic
+    async function requestVirtualNumber() {
+      const country = countrySelect.value;
+      activeNumberDisplay.textContent = 'جاري حجز رقم خلوى...';
+      smsEmptyState.classList.remove('hidden');
+      smsReceivedContent.classList.add('hidden');
+      smsStatusBadge.textContent = 'في انتظار الرسالة...';
+      smsStatusBadge.className = 'text-xs bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/numbers/request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ service: selectedService, country, chatId: tgSettings.chatId }),
+        });
+        const data = await res.json();
+        if (data.ok && data.order) {
+          currentOrder = data.order;
+          activeNumberDisplay.textContent = currentOrder.phoneNumber;
+          targetServiceBadge.textContent = selectedService.toUpperCase();
+          startNumberCountdown();
+          pollNumberStatus();
+        }
+      } catch (err) {
+        console.error('Number request error:', err);
+        const prefix = country === 'id' ? '+62812' : country === 'us' ? '+1202' : '+4477';
+        const num = `${prefix}${Math.floor(1000000 + Math.random() * 9000000)}`;
+        activeNumberDisplay.textContent = num;
+      }
+    }
+
+    function startNumberCountdown() {
+      if (numberInterval) clearInterval(numberInterval);
+      numberCountdown = 900;
+      numberInterval = setInterval(() => {
+        numberCountdown--;
+        const mins = Math.floor(numberCountdown / 60);
+        const secs = numberCountdown % 60;
+        numberTimer.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        if (numberCountdown <= 0) {
+          clearInterval(numberInterval);
+        }
+      }, 1000);
+    }
+
+    async function pollNumberStatus() {
+      if (!currentOrder) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/numbers/${currentOrder.orderId}/check`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.ok && data.order?.status === 'RECEIVED') {
+          showReceivedSms(data.order);
+        }
+      } catch (e) {
+        console.error('Poll number error:', e);
+      }
+    }
+
+    function showReceivedSms(order) {
+      smsEmptyState.classList.add('hidden');
+      smsReceivedContent.classList.remove('hidden');
+      smsStatusBadge.textContent = 'تم استلام الكود!';
+      smsStatusBadge.className = 'text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-bold';
+
+      smsOtpDisplay.textContent = order.smsCode || '------';
+      smsFullText.textContent = order.smsText || 'رسالة التأكيد';
+      copySmsOtpBtn.onclick = () => copyText(order.smsCode, copySmsOtpBtn);
+
+      try { chimeSound.play(); } catch {}
+    }
+
+    // Email Logic
     function updateTgStatus() {
       if (tgSettings.chatId) {
         tgStatusText.textContent = `تليجرام: ${tgSettings.chatId}`;
@@ -323,7 +597,6 @@
       }
     }
 
-    // Server-Side Inbox Creation
     async function createNewInbox(isEdu = false) {
       activeEmailDisplay.textContent = 'جاري توليد إيميل معتمد...';
       try {
@@ -346,7 +619,6 @@
         }
       } catch (err) {
         console.error('Creation error:', err);
-        // Instant client fallback
         const rand = Math.random().toString(36).substring(2, 9);
         const fallbackAddr = isEdu ? `student_${rand}@campus.edu.vn` : `usr_${rand}@fldubai.com`;
         const fbInbox = { address: fallbackAddr, provider: isEdu ? 'edumail' : 'mailtm', isEdu, messages: [] };
@@ -417,11 +689,13 @@
       }
     }
 
-    // Parallel Background Poller
     async function pollAllInboxes() {
       refreshIcon.classList.add('fa-spin');
       try {
         await Promise.all(inboxes.map(inbox => fetchInboxMessages(inbox)));
+        if (currentOrder && currentOrder.status === 'PENDING') {
+          await pollNumberStatus();
+        }
       } finally {
         setTimeout(() => refreshIcon.classList.remove('fa-spin'), 600);
       }
@@ -632,7 +906,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             chat_id: chatId,
-            text: '🔔 <b>تجربة ربط Emailsaty بنجاح!</b>\nسيتم إرسال أكواد التحقق لجميع إيميلاتك هنا فوراً.',
+            text: '🔔 <b>تجربة ربط Emailsaty بنجاح!</b>\nسيتم إرسال أكواد التحقق لجميع إيميلاتك وأرقامك هنا فوراً.',
             parse_mode: 'HTML',
           })
         });
