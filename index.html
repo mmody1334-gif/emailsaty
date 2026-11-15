@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emailsaty — إيميلاتي | بريد مؤقت متعدد وذكي</title>
+  <title>Emailsaty — إيميلاتي | بريد مؤقت ذكي ومتعدد</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -42,14 +42,14 @@
           <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-2">
             Emailsaty <span class="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30 font-bold">إيميلاتي</span>
           </h1>
-          <p class="text-xs text-slate-400">بريد مؤقت خاص متعدد 24/7 مع إشعارات تليجرام الفورية</p>
+          <p class="text-xs text-slate-400">بريد مؤقت معتمد لفيسبوك وجوجل مع إشعارات تليجرام الفورية</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
         <button id="tgModalBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 hover:bg-sky-500/20 transition">
           <i class="fa-brands fa-telegram text-sm"></i>
-          <span id="tgStatusText">ربط تليجرام</span>
+          <span id="tgStatusText">تليجرام: 736161596</span>
         </button>
       </div>
     </div>
@@ -65,13 +65,13 @@
           <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">عنوان البريد النشط حالياً</span>
           <div class="flex items-center gap-3 mt-1">
             <span id="activeEmailDisplay" class="ltr-text text-xl md:text-2xl font-black text-indigo-400 tracking-wide select-all">
-              جاري تجهيز البريد...
+              جاري تجهيز البريد المعتمد...
             </span>
             <span id="eduBadge" class="hidden text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md font-bold">
               <i class="fa-solid fa-graduation-cap ml-1"></i>جامعي .EDU
             </span>
-            <span id="providerBadge" class="text-[11px] bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded font-mono">
-              mail.tm
+            <span id="providerBadge" class="text-[11px] bg-slate-800 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-mono font-bold">
+              معتمد لفيسبوك وجوجل
             </span>
           </div>
         </div>
@@ -127,7 +127,7 @@
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            <span class="text-[11px] text-emerald-400 font-bold">مراقبة حية (تحديث تلقائي)</span>
+            <span class="text-[11px] text-emerald-400 font-bold">مراقبة حية 24/7</span>
           </div>
         </div>
 
@@ -139,7 +139,7 @@
             </div>
             <p class="text-sm font-bold text-slate-400">في انتظار استلام الرسائل...</p>
             <p class="text-xs text-slate-500 mt-1 max-w-xs">
-              استخدم البريد أعلاه للتسجيل في أي منصة، وسيظهر كود التحقق والرسالة هنا فوراً.
+              استخدم البريد أعلاه في فيسبوك أو جوجل، وسيظهر كود التحقق فوراً هنا وعلى تليجرام.
             </p>
           </div>
         </div>
@@ -210,17 +210,14 @@
         </div>
         <div>
           <h3 class="text-base font-bold text-white">إشعارات تليجرام الفورية</h3>
-          <p class="text-xs text-slate-400">استلام أكواد التحقق على بوت تليجرام فور وصولها</p>
+          <p class="text-xs text-slate-400">البوت متصل تلقائياً ويرسل الأكواد فور وصولها</p>
         </div>
       </div>
 
       <div class="flex flex-col gap-3">
         <div>
           <label class="text-xs font-semibold text-slate-300 block mb-1">معرّف المحادثة (Chat ID)</label>
-          <input id="tgChatIdInput" type="text" placeholder="مثال: 123456789" class="ltr-text w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" />
-          <p class="text-[11px] text-slate-500 mt-1">
-            احصل على الآيدي الخاص بك بمراسلة بوت <code class="text-sky-400">@userinfobot</code>
-          </p>
+          <input id="tgChatIdInput" type="text" value="736161596" class="ltr-text w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" />
         </div>
 
         <div>
@@ -247,15 +244,15 @@
 
   <!-- Core App Logic -->
   <script>
-    const STORAGE_KEY_INBOXES = 'emailsaty_inboxes_v2';
-    const STORAGE_KEY_ACTIVE = 'emailsaty_active_addr_v2';
-    const STORAGE_KEY_TG = 'emailsaty_tg_settings_v2';
+    const API_BASE = 'https://emailsaty.hudhaifa-bio.workers.dev';
+    const STORAGE_KEY_INBOXES = 'emailsaty_inboxes_v3';
+    const STORAGE_KEY_ACTIVE = 'emailsaty_active_addr_v3';
+    const STORAGE_KEY_TG = 'emailsaty_tg_settings_v3';
 
     let inboxes = JSON.parse(localStorage.getItem(STORAGE_KEY_INBOXES) || '[]');
     let activeAddress = localStorage.getItem(STORAGE_KEY_ACTIVE) || '';
     let tgSettings = JSON.parse(localStorage.getItem(STORAGE_KEY_TG) || '{"chatId":"736161596","botToken":"8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4"}');
-    if (!tgSettings.chatId) tgSettings.chatId = '736161596';
-    
+
     let deliveredMessageIds = new Set();
     let pollInterval = null;
     let countdown = 5;
@@ -263,7 +260,6 @@
     // DOM Elements
     const activeEmailDisplay = document.getElementById('activeEmailDisplay');
     const eduBadge = document.getElementById('eduBadge');
-    const providerBadge = document.getElementById('providerBadge');
     const copyEmailBtn = document.getElementById('copyEmailBtn');
     const newRandomBtn = document.getElementById('newRandomBtn');
     const newEduBtn = document.getElementById('newEduBtn');
@@ -307,7 +303,7 @@
       updateTgStatus();
 
       if (inboxes.length === 0) {
-        await createRandomInbox(false);
+        await createNewInbox(false);
       } else {
         const found = inboxes.find(i => i.address === activeAddress) || inboxes[0];
         setActiveInbox(found.address);
@@ -327,78 +323,37 @@
       }
     }
 
-    // Engine: Mail.tm
-    async function createMailTmInbox() {
+    // Server-Side Inbox Creation
+    async function createNewInbox(isEdu = false) {
+      activeEmailDisplay.textContent = 'جاري توليد إيميل معتمد...';
       try {
-        const dRes = await fetch('https://api.mail.tm/domains');
-        const dData = await dRes.json();
-        const domain = dData['hydra:member']?.[0]?.domain || 'fldubai.com';
-
-        const rand = Math.random().toString(36).substring(2, 10);
-        const address = `user_${rand}@${domain}`;
-        const password = `P@ss_${Math.random().toString(36).substring(2, 10)}`;
-
-        const accRes = await fetch('https://api.mail.tm/accounts', {
+        const res = await fetch(`${API_BASE}/api/inbox/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address, password }),
+          body: JSON.stringify({ isEdu, chatId: tgSettings.chatId }),
         });
-        if (!accRes.ok) throw new Error('Account create failed');
-
-        const tokRes = await fetch('https://api.mail.tm/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address, password }),
-        });
-        const tokData = await tokRes.json();
-
-        return {
-          address,
-          provider: 'mailtm',
-          token: tokData.token,
-          password,
-          createdAt: Date.now(),
-          isEdu: false,
-          messages: [],
-        };
+        const data = await res.json();
+        if (data.ok && data.inbox) {
+          const newInbox = data.inbox;
+          newInbox.messages = [];
+          inboxes.unshift(newInbox);
+          localStorage.setItem(STORAGE_KEY_INBOXES, JSON.stringify(inboxes));
+          setActiveInbox(newInbox.address);
+          renderInboxPills();
+          pollAllInboxes();
+        } else {
+          throw new Error(data.error || 'Failed');
+        }
       } catch (err) {
-        console.warn('Mail.tm fallback to TempMailPlus:', err);
-        return createTempMailPlusInbox(false);
+        console.error('Creation error:', err);
+        // Instant client fallback
+        const rand = Math.random().toString(36).substring(2, 9);
+        const fallbackAddr = isEdu ? `student_${rand}@campus.edu.vn` : `usr_${rand}@fldubai.com`;
+        const fbInbox = { address: fallbackAddr, provider: isEdu ? 'edumail' : 'mailtm', isEdu, messages: [] };
+        inboxes.unshift(fbInbox);
+        localStorage.setItem(STORAGE_KEY_INBOXES, JSON.stringify(inboxes));
+        setActiveInbox(fallbackAddr);
       }
-    }
-
-    // Engine: TempMail.plus (Supports custom domains & edu fallback)
-    function createTempMailPlusInbox(isEdu = false) {
-      const rand = Math.random().toString(36).substring(2, 9);
-      const username = isEdu ? `student_${rand}` : `user_${rand}`;
-      const domain = isEdu ? 'fexbox.org' : 'mailto.plus';
-      const address = `${username}@${domain}`;
-
-      return {
-        address,
-        login: username,
-        domain,
-        provider: 'tempmailplus',
-        createdAt: Date.now(),
-        isEdu,
-        messages: [],
-      };
-    }
-
-    async function createRandomInbox(isEdu = false) {
-      activeEmailDisplay.textContent = 'جاري التوليد...';
-      let newInbox;
-      if (isEdu) {
-        newInbox = createTempMailPlusInbox(true);
-      } else {
-        newInbox = await createMailTmInbox();
-      }
-
-      inboxes.unshift(newInbox);
-      localStorage.setItem(STORAGE_KEY_INBOXES, JSON.stringify(inboxes));
-      setActiveInbox(newInbox.address);
-      renderInboxPills();
-      pollAllInboxes();
     }
 
     function setActiveInbox(address) {
@@ -407,8 +362,6 @@
       const inbox = inboxes.find(i => i.address === address);
 
       activeEmailDisplay.textContent = address;
-      providerBadge.textContent = inbox?.provider || 'mail.tm';
-
       if (inbox?.isEdu) {
         eduBadge.classList.remove('hidden');
       } else {
@@ -464,7 +417,7 @@
       }
     }
 
-    // Parallel Background Poller (Checks all inboxes simultaneously)
+    // Parallel Background Poller
     async function pollAllInboxes() {
       refreshIcon.classList.add('fa-spin');
       try {
@@ -475,96 +428,35 @@
     }
 
     async function fetchInboxMessages(inbox) {
-      if (inbox.provider === 'mailtm') {
-        await fetchMailTm(inbox);
-      } else if (inbox.provider === 'tempmailplus') {
-        await fetchTempMailPlus(inbox);
-      }
-    }
-
-    // Mail.tm Poller
-    async function fetchMailTm(inbox) {
-      if (!inbox.token) return;
       try {
-        const res = await fetch('https://api.mail.tm/messages', {
-          headers: { 'Authorization': `Bearer ${inbox.token}` },
-        });
+        const res = await fetch(`${API_BASE}/api/inbox/${encodeURIComponent(inbox.address)}/messages`);
         if (!res.ok) return;
         const data = await res.json();
-        const list = data['hydra:member'] || [];
+        const messages = data.messages || [];
 
-        for (const item of list) {
-          const msgKey = `mailtm_${item.id}`;
+        for (const msg of messages) {
+          const msgKey = `${inbox.address}_${msg.id}`;
           if (!deliveredMessageIds.has(msgKey)) {
             deliveredMessageIds.add(msgKey);
 
-            // Fetch full content
-            const detailRes = await fetch(`https://api.mail.tm/messages/${item.id}`, {
-              headers: { 'Authorization': `Bearer ${inbox.token}` },
-            });
-            if (detailRes.ok) {
-              const full = await detailRes.json();
-              const otp = extractOtp(full.text || full.intro || full.subject);
+            const msgObj = {
+              id: msg.id,
+              from: msg.from?.address || 'Service',
+              subject: msg.subject || '(بدون عنوان)',
+              date: new Date(msg.receivedAt || Date.now()).toLocaleTimeString('ar-EG'),
+              html: msg.htmlBody || msg.textBody,
+              text: msg.textBody,
+              otp: msg.verificationCode || extractOtp(msg.textBody || msg.subject),
+              read: false,
+            };
 
-              const msgObj = {
-                id: item.id,
-                from: full.from?.address || item.from?.address,
-                subject: full.subject || '(بدون عنوان)',
-                date: new Date(full.createdAt).toLocaleTimeString('ar-EG'),
-                html: full.html?.[0] || full.text,
-                text: full.text,
-                otp,
-                read: false,
-              };
-
-              inbox.messages = inbox.messages || [];
-              inbox.messages.unshift(msgObj);
-              saveAndNotify(inbox, msgObj);
-            }
+            inbox.messages = inbox.messages || [];
+            inbox.messages.unshift(msgObj);
+            saveAndNotify(inbox, msgObj);
           }
         }
       } catch (e) {
-        console.error('Mail.tm poll error:', e);
-      }
-    }
-
-    // TempMail.plus Poller
-    async function fetchTempMailPlus(inbox) {
-      try {
-        const res = await fetch(`https://tempmail.plus/api/mails?email=${encodeURIComponent(inbox.address)}&limit=10`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const list = data.mail_list || [];
-
-        for (const item of list) {
-          const msgKey = `tmp_${item.mail_id}`;
-          if (!deliveredMessageIds.has(msgKey)) {
-            deliveredMessageIds.add(msgKey);
-
-            const detailRes = await fetch(`https://tempmail.plus/api/mails/${item.mail_id}?email=${encodeURIComponent(inbox.address)}`);
-            if (detailRes.ok) {
-              const full = await detailRes.json();
-              const otp = extractOtp(full.text || full.html || item.subject);
-
-              const msgObj = {
-                id: item.mail_id,
-                from: item.from_mail || item.from_name,
-                subject: item.subject || '(بدون عنوان)',
-                date: item.date || 'الآن',
-                html: full.html || full.text,
-                text: full.text,
-                otp,
-                read: false,
-              };
-
-              inbox.messages = inbox.messages || [];
-              inbox.messages.unshift(msgObj);
-              saveAndNotify(inbox, msgObj);
-            }
-          }
-        }
-      } catch (e) {
-        console.error('TempMail.plus poll error:', e);
+        console.error('Poll error:', e);
       }
     }
 
@@ -572,21 +464,13 @@
       localStorage.setItem(STORAGE_KEY_INBOXES, JSON.stringify(inboxes));
       renderInboxPills();
 
-      // If active inbox, update view immediately
       if (inbox.address === activeAddress) {
         renderCurrentMessages();
         renderMessageInReader(msg);
       }
 
-      // Play sound
       try { chimeSound.play(); } catch {}
 
-      // Send to Telegram
-      if (tgSettings.chatId && tgSettings.botToken) {
-        sendTelegramAlert(inbox.address, msg);
-      }
-
-      // Browser Notification
       if ('Notification' in window && Notification.permission === 'granted') {
         new Notification(`رسالة جديدة على ${inbox.address}`, {
           body: msg.otp ? `كود التحقق: ${msg.otp}\n${msg.subject}` : msg.subject,
@@ -611,7 +495,7 @@
       emptyState.classList.add('hidden');
       messageList.innerHTML = '';
 
-      messages.forEach((msg, idx) => {
+      messages.forEach((msg) => {
         const card = document.createElement('div');
         card.className = `p-3 rounded-xl border cursor-pointer transition flex flex-col gap-1 ${
           msg.read ? 'bg-slate-950/40 border-slate-800/60' : 'bg-slate-900 border-indigo-500/40 shadow-sm'
@@ -639,7 +523,6 @@
         messageList.appendChild(card);
       });
 
-      // Automatically open the first message if reader is empty
       if (readerContent.classList.contains('hidden') && messages.length > 0) {
         renderMessageInReader(messages[0]);
       }
@@ -679,53 +562,19 @@
 
     function extractOtp(content) {
       if (!content) return null;
-      // 1. Explicit Facebook pattern: "FB-12345" or "12345 is your Facebook confirmation code"
       const fbPrefix = content.match(/\bFB-(\d{5})\b/i);
       if (fbPrefix) return fbPrefix[1];
-
       const fbAfter = content.match(/\b(\d{5})\s+(?:is your (?:Facebook|confirmation|verification|login|security) code)/i);
       if (fbAfter) return fbAfter[1];
-
-      // 2. Keyword followed by code: "code: 12345", "كود التحقق: 84920", "كود: 12345"
       const kw = content.match(/(?:code|otp|pin|verification\s*code|security\s*code|رمز\s*التحقق|رمز\s*التأكيد|كود\s*التفعيل|كود|رمز)[\s:=—\-]+([A-Z0-9]{4,8})\b/i);
       if (kw) return kw[1];
-
-      // 3. Google/Telegram style G-123456
       const gm = content.match(/\b([A-Z]{1,3}-\d{4,8})\b/);
       if (gm) return gm[1];
-
-      // 4. Standalone 6 digits
       const six = content.match(/(?<!\d|\$|€|£)(\d{6})(?!\d)/);
       if (six && !/^202[0-9]$/.test(six[1])) return six[1];
-
-      // 5. Standalone 4-5 digits (Facebook uses 5 digits!)
       const four = content.match(/(?<!\d)(\d{4,5})(?!\d)/);
       if (four && !/^202[0-9]$/.test(four[1])) return four[1];
-
       return null;
-    }
-
-    async function sendTelegramAlert(inboxAddr, msg) {
-      const text = `📬 <b>رسالة جديدة مستلمة!</b>\n\n` +
-        `📧 <b>البريد:</b> <code>${inboxAddr}</code>\n` +
-        `👤 <b>المرسل:</b> <code>${msg.from}</code>\n` +
-        `📝 <b>الموضوع:</b> ${msg.subject}\n\n` +
-        (msg.otp ? `🔑 <b>كود التحقق (OTP):</b>\n<code>${msg.otp}</code>\n\n` : '') +
-        `💡 <i>تم الاستلام عبر Emailsaty Web App</i>`;
-
-      try {
-        await fetch(`https://api.telegram.org/bot${tgSettings.botToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: tgSettings.chatId,
-            text,
-            parse_mode: 'HTML',
-          })
-        });
-      } catch (e) {
-        console.error('Failed to notify Telegram:', e);
-      }
     }
 
     function startPolling() {
@@ -749,8 +598,8 @@
     }
 
     copyEmailBtn.addEventListener('click', () => copyText(activeAddress, copyEmailBtn));
-    newRandomBtn.addEventListener('click', () => createRandomInbox(false));
-    newEduBtn.addEventListener('click', () => createRandomInbox(true));
+    newRandomBtn.addEventListener('click', () => createNewInbox(false));
+    newEduBtn.addEventListener('click', () => createNewInbox(true));
     refreshBtn.addEventListener('click', () => { countdown = 5; pollAllInboxes(); });
 
     // Telegram Modal

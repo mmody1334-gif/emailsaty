@@ -9,20 +9,21 @@ export class MailTmEngine implements MailEngine {
   async getDomains(): Promise<string[]> {
     try {
       const res = await fetch(`${BASE_URL}/domains`, {
-        headers: { Accept: 'application/json' },
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       })
-      if (!res.ok) return []
+      if (!res.ok) return ['fldubai.com']
       const data: any = await res.json()
       const list = data['hydra:member'] || data.member || []
-      return list.map((item: any) => item.domain).filter(Boolean)
+      const domains = list.map((item: any) => item.domain).filter(Boolean)
+      return domains.length > 0 ? domains : ['fldubai.com']
     } catch {
-      return []
+      return ['fldubai.com']
     }
   }
 
   async generateInbox(preferredName?: string, domainChoice?: string): Promise<GeneratedInbox> {
     const domains = await this.getDomains()
-    const domain = domainChoice || domains[0] || 'vmani.com'
+    const domain = domainChoice || domains[0] || 'fldubai.com'
     const cleanPrefix = (preferredName || `usr${Math.random().toString(36).substring(2, 9)}`)
       .toLowerCase()
       .replace(/[^a-z0-9._-]/g, '')
@@ -35,9 +36,10 @@ export class MailTmEngine implements MailEngine {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ address, password }),
     })
+    const createText = await createRes.text()
 
     if (!createRes.ok && createRes.status !== 422) {
-      throw new Error(`Failed to create mail.tm account: ${createRes.status}`)
+      throw new Error(`Failed to create mail.tm account: ${createRes.status} - ${createText}`)
     }
 
     // 2. Obtain token
@@ -46,12 +48,13 @@ export class MailTmEngine implements MailEngine {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ address, password }),
     })
+    const tokenText = await tokenRes.text()
 
     if (!tokenRes.ok) {
-      throw new Error(`Failed to authenticate mail.tm: ${tokenRes.status}`)
+      throw new Error(`Failed to authenticate mail.tm: ${tokenRes.status} - ${tokenText} (create was ${createRes.status}: ${createText})`)
     }
 
-    const tokenData: any = await tokenRes.json()
+    const tokenData: any = JSON.parse(tokenText)
     const token = tokenData.token
     const id = tokenData.id
 

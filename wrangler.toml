@@ -1,0 +1,16 @@
+name = "emailsaty"
+account_id = "0000e4925fd52a263ae76a9053eade14"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[vars]
+BOT_TOKEN = "8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4"
+PUBLIC_BASE_URL = "https://emailsaty.hudhaifa-bio.workers.dev"
+
+[triggers]
+crons = ["* * * * *"]
+
+[[kv_namespaces]]
+binding = "EMAILSATY_STORAGE"
+id = "3f963e74626b4f19a2e4244f85012c57"
