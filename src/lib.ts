@@ -20,11 +20,16 @@ export const OWNER_TELEGRAM_ID = "736161596";
 
 /** Primary domain — ONLY mail.elkabsula.site (Mohamed's decision
  *  2026-11-17). It is a subdomain of a domain he already owns: $0 extra.
- *  ⚠️ DNS FLAG: elkabsula.site's DNS zone currently lives in his OLD
- *  Cloudflare account. For the NEW account (mmody1330@gmail.com) the
- *  mail.elkabsula.site subdomain must be set up there (subdomain zone /
- *  MX + Email Routing in the new account) before live receiving can be
- *  tested — Stage 2 cannot pass until that DNS step is done by him.
+ *  ⚠️ RECEIVING FLAG: a `mail.elkabsula.site` zone cannot be created —
+ *  Cloudflare free accounts reject subdomains as zones (API error
+ *  1116; subdomain zones are Enterprise-only, verified 2026-11-17).
+ *  So mail is received in the OLD account (where the `elkabsula.site`
+ *  zone lives) via Email Routing + the relay Worker
+ *  (src/relay-worker.ts), which forwards it to the storage Worker in
+ *  the NEW account. HARD RULE: الكبسولة must not be affected at all —
+ *  relay setup may ONLY add mail-subdomain MX + a routing rule for
+ *  @mail.elkabsula.site; never touch root DNS records, nameservers,
+ *  or الكبسولة Workers/routes.
  *  No .edu domain is listed here on purpose: .edu is restricted to
  *  accredited US postsecondary institutions (EDUCAUSE) and is not
  *  available to an individual / Omani K-12 school. */
