@@ -87,10 +87,13 @@
 
 <script>
 "use strict";
-/* API base: same origin in production (Worker serves the API on
- * /api/*). For local preview set ?api=https://<worker>.workers.dev */
+/* API base: the storage Worker on workers.dev. The frontend is served
+ * from GitHub Pages, so the API is cross-origin — a same-origin default
+ * ("") would call github.io/api/* and Pages answers 404 (GET) / 405
+ * (POST). Override for local preview with
+ * ?api=https://<worker>.workers.dev */
 const params = new URLSearchParams(location.search);
-const API_BASE = (params.get("api") || "").replace(/\/+$/, "");
+const API_BASE = (params.get("api") || "https://emailsaty.emailsaty.workers.dev").replace(/\/+$/, "");
 const api = (p) => API_BASE + p;
 
 const PRIMARY_DOMAIN = "mail.elkabsula.site";
