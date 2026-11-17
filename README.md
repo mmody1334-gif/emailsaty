@@ -31,7 +31,7 @@ step below, done by Mohamed on his own machine/account.**
 |---|---|
 | Public pool, anyone who guesses the address can read it | Private: token-only inbox, owner Telegram id 736161596 |
 | Messages die in 1–2 h | **Saved mailboxes**: kept until the owner deletes them |
-| New address abandons the old one | Old mailboxes keep receiving; Telegram notifies on **any** of them, even after a new one is generated |
+| New address abandons the old one | Old mailboxes keep receiving (Telegram notify on **any** of them is **deferred** — web app only for now, see below) |
 | Many public domains (heavily blocklisted) | One private domain (below) — not published, so it stays clean longer |
 
 ## Architecture
@@ -43,7 +43,7 @@ GitHub Pages (index.html, static frontend, Arabic RTL)
 Cloudflare Worker (src/worker.ts)  ── Email Routing (catch-all)
         │  D1: mailboxes + messages (schema.sql)
         ▼
-Telegram bot (notify on arrival: sender / subject / code)
+Telegram bot — DEFERRED (see below); everything in the web app for now
 ```
 
 - **Frontend** (`index.html`): generate random address, custom login +
@@ -55,7 +55,8 @@ Telegram bot (notify on arrival: sender / subject / code)
   OFFLINE honestly; it never invents fake messages.
 - **Worker** (`src/worker.ts`): `email()` entry point parses the raw
   message, extracts sender/subject/body/verification code, stores it
-  in D1, and notifies Telegram. `fetch()` serves
+  in D1, and — only if `TELEGRAM_BOT_TOKEN` is set — notifies Telegram
+  (currently deferred, so no notification is sent). `fetch()` serves
   `GET /api/domains`, `POST /api/mailboxes`, `GET /api/mailboxes/:token/messages`,
   `GET /api/messages/:id?token=…`, `DELETE` for both.
 - **D1** (`schema.sql`): `mailboxes(address, token, telegram_chat_id,
@@ -75,6 +76,21 @@ Telegram bot (notify on arrival: sender / subject / code)
   clearly labelled shared/public, **not private**, not enabled by
   default. It is the only public fallback; no other public providers
   are hard-coded.
+
+## Telegram — deferred (2026-11-17)
+
+**Deferred — everything in the web app for now.** No Telegram bot is
+needed for Stage 2: new mail is read in the web app's inbox, and old
+mailboxes keep receiving and stay readable there too. The Worker
+already skips Telegram notify when `TELEGRAM_BOT_TOKEN` is unset
+(`notifyTelegram` returns early), and the deploy workflow
+(`.github/workflows/deploy.yml`) requires **no** Telegram secret.
+
+To re-enable notifications later: create a bot in BotFather, set it
+as the Worker secret `TELEGRAM_BOT_TOKEN` (`wrangler secret put
+TELEGRAM_BOT_TOKEN`), and the Worker will notify on arrival (sender /
+subject / code) for every saved mailbox, old or new. Owner chat id
+is already configured: `736161596`. Do not put the token in this repo.
 
 ### ⚠️ DNS BLOCKER — Stage 2 cannot pass until Mohamed does this
 
@@ -103,11 +119,47 @@ failure is a DNS-setup failure, not a code failure.
   inbox / open / delete in Android Chrome; typing + keyboard work.
 - **Stage 4 — Saved inboxes**: generate A, then B, send to A —
   A still shows the message and Telegram notifies.
-- **Stage 5 — Telegram bot**: webhook, `/new` / `/list`, notification
-  with code + deep link.
+- **Stage 5 — Telegram bot (DEFERRED)**: webhook, `/new` / `/list`,
+  notification with code + deep link. Not needed for Stage 2 — see
+  "Telegram — deferred" above.
 - **Stage 6 — Domain check**: live signup test on the one domain.
 - **Stage 7 — Sending (optional, later)**: only from a verified
   domain with SPF/DKIM/DMARC + a relay; never faked from the temp domain.
+
+## Stage 2 checklist (deploy) — do in this order
+
+1. **Create the D1 database** on the NEW Cloudflare account
+   (`mmody1330@gmail.com`, signed in on Chrome):
+   `wrangler d1 create emailsaty-db` — then paste the returned
+   `database_id` into `wrangler.toml` (replacing
+   `PASTE_D1_DATABASE_ID_HERE`) and apply the schema:
+   `wrangler d1 execute emailsaty-db --file=./schema.sql`.
+   The deploy workflow does **not** create D1 — it fails clearly if
+   the id is still the placeholder.
+2. **Add the GitHub repo secrets** on `mmody1334-gif/emailsaty`
+   (Settings → Secrets → Actions):
+   `CLOUDFLARE_API_TOKEN` (API token from the NEW account) and
+   `CLOUDFLARE_ACCOUNT_ID` (Account ID of the NEW account).
+   Never put them in the repo or in `wrangler.toml`.
+3. **Set up the `mail.elkabsula.site` subdomain in the NEW account**:
+   add the subdomain zone in the new Cloudflare account, and delegate
+   it from the OLD account (where `elkabsula.site`'s zone lives) with
+   NS records pointing at the new account's nameservers for
+   `mail.elkabsula.site`. No paid domain is needed — this is a
+   subdomain of a domain already owned ($0 extra).
+4. **Enable Email Routing (catch-all) in the NEW account**: Email →
+   Email Routing → Routing rules → Catch-all → Send to Worker →
+   destination Worker `emailsaty`, for `mail.elkabsula.site`.
+   Cloudflare then manages the MX records automatically.
+5. **Push the deploy workflow**: copy `.github/workflows/deploy.yml`
+   (and the `package.json` test-script fix) to the repo's `main`
+   branch. Pushes touching `src/**`, `wrangler.toml`, `schema.sql`
+   or the workflow itself trigger `npx wrangler deploy` (after
+   `npm ci`, `npm test`, `tsc --noEmit` and the D1 check).
+6. **Live test**: real Gmail → a generated address, message appears
+   in the web app in < 60 s with the right code. No Telegram
+   notification is expected (deferred) — check the web app inbox.
+   Fix + re-test on failure; do not continue until clean.
 
 ## What still needs Mohamed
 
@@ -116,8 +168,9 @@ failure is a DNS-setup failure, not a code failure.
 2. **New-account credentials**: Account ID + API token from the
    `mmody1330@gmail.com` Cloudflare account (for the GitHub deploy
    workflow). Tokens are never stored in this repo.
-3. **Telegram bot token**: create a new bot in BotFather, set it as
-   the Worker secret `TELEGRAM_BOT_TOKEN` (`wrangler secret put`).
+3. **Telegram bot token — DEFERRED, not needed now.** Create a new
+   bot in BotFather and set it as the Worker secret
+   `TELEGRAM_BOT_TOKEN` only when notifications are wanted again.
    Owner chat id is already configured: `736161596`.
 4. **D1**: `wrangler d1 create emailsaty-db`, paste the id into
    `wrangler.toml`, run `schema.sql`.
