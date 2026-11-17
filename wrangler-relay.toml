@@ -1,0 +1,37 @@
+# emailsaty-relay — Cloudflare Worker config for the OLD account.
+# This is the RECEIVING side: Email Routing in the old account's
+# elkabsula.site zone delivers mail to this Worker, which forwards it
+# to the storage Worker in the NEW account (mmody1330@gmail.com).
+# Do NOT deploy this from / to the new account.
+#
+# account_id is intentionally NOT hard-coded here. Deploy from a
+# shell logged in to the OLD account (wrangler login), or pass
+# --account-id / CLOUDFLARE_ACCOUNT_ID for the old account.
+# NEVER use the new account's account_id with this file.
+
+name = "emailsaty-relay"
+main = "src/relay-worker.ts"
+compatibility_date = "2026-11-17"
+
+# NO D1 binding: the relay stores nothing. Storage lives in the
+# NEW account Worker (src/worker.ts + emailsaty-db).
+
+[vars]
+# Fill in AFTER the first deploy of the NEW account Worker
+# (wrangler.toml) — its URL is shown by `wrangler deploy` and in the
+# dashboard (Workers & Pages → emailsaty → Visit).
+# Example: https://emailsaty.<your-subdomain>.workers.dev/api/ingest
+INGEST_URL = "PLACEHOLDER_INGEST_URL"
+
+# Secrets (never in this file — set with wrangler secret put):
+#   INGEST_SECRET — MUST be the exact same value as INGEST_SECRET on
+#   the NEW account Worker (wrangler secret put INGEST_SECRET there
+#   too). The relay sends it as the x-ingest-secret header and in the
+#   JSON body; the storage Worker rejects anything else with 401.
+#   Generate one with: openssl rand -hex 32
+#   wrangler secret put INGEST_SECRET   (run in BOTH accounts)
+#
+# Email Routing (dashboard, OLD account, elkabsula.site zone):
+#   Email -> Email Routing -> Routing rules -> Catch-all -> Send to Worker
+#   Destination worker: emailsaty-relay. Cloudflare then manages the
+#   MX records for the mail subdomain automatically.
