@@ -2,10 +2,8 @@
 # NEW account only (mmody1330@gmail.com). Do NOT deploy from / to the
 # old Filmaty/SaveLink account.
 #
-# account_id is intentionally NOT hard-coded here. Fill it in (or pass
-# --account-id) on Mohamed's machine after `wrangler login` with the
-# new account, or set CLOUDFLARE_ACCOUNT_ID as a GitHub secret.
-# account_id = "PASTE_NEW_ACCOUNT_ID_HERE"
+# account_id for the NEW account (mmody1330@gmail.com).
+account_id = "a5aa88e4862fd0f6b4652d92337e902b"
 
 name = "emailsaty"
 main = "src/worker.ts"
@@ -17,7 +15,7 @@ compatibility_date = "2026-11-17"
 [[d1_databases]]
 binding = "DB"
 database_name = "emailsaty-db"
-database_id = "PASTE_D1_DATABASE_ID_HERE"
+database_id = "d7935a6f-f6be-42f2-8643-945ad6bea548"
 
 # Free domain — ONLY mail.elkabsula.site (subdomain of a domain Mohamed
 # already owns — $0 extra). No other primary domain.
@@ -31,7 +29,9 @@ DOMAINS = "mail.elkabsula.site"
 TELEGRAM_CHAT_ID = "736161596"
 
 # Secrets (never in this file — set with wrangler secret put):
-#   TELEGRAM_BOT_TOKEN   — token of the new emailsaty Telegram bot
+#   TELEGRAM_BOT_TOKEN   — DEFERRED (2026-11-17): only set this later
+#   to re-enable Telegram notifications; the Worker skips notify
+#   when it is unset, and the deploy workflow needs no Telegram secret.
 #
 # Email Routing (dashboard, new account, per domain):
 #   Email -> Email Routing -> Routing rules -> Catch-all -> Send to Worker
