@@ -35,11 +35,84 @@ export interface Env {
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string; // default owner chat id; defaults to OWNER_TELEGRAM_ID
   DOMAINS?: string; // optional comma-separated override of DEFAULT_DOMAINS
+  INGEST_SECRET?: string; // shared secret for POST /api/ingest (relay Worker)
 }
 
 function getDomains(env: Env): string[] {
   const override = (env.DOMAINS ?? "").split(",").map((d) => d.trim().toLowerCase()).filter(Boolean);
   return override.length ? override : [...DEFAULT_DOMAINS];
+}
+
+/** Constant-time string comparison, so the ingest secret is not
+ *  leaked through timing. Plain equality would also work; this is cheap. */
+function secretsEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/**
+ * POST /api/ingest — relay-only endpoint.
+ * The relay Worker (old account, src/relay-worker.ts) forwards mail
+ * here after Email Routing delivers it. Auth is the shared
+ * INGEST_SECRET in the x-ingest-secret header — no mailbox token.
+ * The mailbox must already exist (created from the web app); unknown
+ * addresses are NOT auto-created, so a stray relay cannot fill D1
+ * with mailboxes nobody owns.
+ */
+async function handleIngest(request: Request, env: Env): Promise<Response> {
+  if (!env.INGEST_SECRET) return error("ingest not configured", 500);
+  const headerSecret = request.headers.get("x-ingest-secret") ?? "";
+  if (!secretsEqual(headerSecret, env.INGEST_SECRET)) {
+    return error("unauthorized", 401);
+  }
+  let body: {
+    to?: unknown;
+    sender?: unknown;
+    subject?: unknown;
+    body_text?: unknown;
+    body_html?: unknown;
+    code?: unknown;
+    received_at?: unknown;
+  };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return error("invalid JSON body", 400);
+  }
+  if (typeof body.to !== "string") return error("missing 'to'", 400);
+  const address = body.to.trim().toLowerCase();
+  const check = validateAddress(address, getDomains(env));
+  if (!check.ok) return error(check.error!, 400);
+  const mailbox = await findMailboxByAddress(env, address);
+  if (!mailbox) return error("mailbox not found", 404);
+  if (typeof body.sender !== "string") return error("missing 'sender'", 400);
+  const subject = typeof body.subject === "string" ? body.subject : "";
+  const bodyText = typeof body.body_text === "string" ? body.body_text : "";
+  const bodyHtml = typeof body.body_html === "string" ? body.body_html : null;
+  const code =
+    typeof body.code === "string"
+      ? body.code
+      : extractVerificationCode(`${subject}\n${bodyText}`);
+  const receivedAt =
+    typeof body.received_at === "string" && body.received_at
+      ? body.received_at
+      : new Date().toISOString();
+  const result = await env.DB.prepare(
+    "INSERT INTO messages (mailbox_address, sender, subject, body_text, body_html, code, received_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+  )
+    .bind(address, body.sender, subject, bodyText, bodyHtml, code, receivedAt)
+    .run();
+  const id =
+    (result as { meta?: { last_row_id?: number } })?.meta?.last_row_id ??
+    null;
+  await env.DB.prepare("UPDATE mailboxes SET last_seen_at = ? WHERE address = ?")
+    .bind(receivedAt, address)
+    .run();
+  return json({ ok: true, id }, 201);
 }
 
 function json(data: unknown, status = 200): Response {
@@ -221,6 +294,11 @@ export default {
     const url = new URL(request.url);
     if (request.method === "OPTIONS") return json({ ok: true });
     const path = url.pathname.replace(/\/+$/, "") || "/";
+
+    // POST /api/ingest — relay-only (see handleIngest above).
+    if (request.method === "POST" && path === "/api/ingest") {
+      return handleIngest(request, env);
+    }
 
     // GET /api/domains — the free domains this service receives for.
     if (request.method === "GET" && path === "/api/domains") {
