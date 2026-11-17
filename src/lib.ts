@@ -26,16 +26,28 @@ export const OWNER_TELEGRAM_ID = "736161596";
  *  So mail is received in the OLD account (where the `elkabsula.site`
  *  zone lives) via Email Routing + the relay Worker
  *  (src/relay-worker.ts), which forwards it to the storage Worker in
- *  the NEW account. HARD RULE: الكبسولة must not be affected at all —
- *  relay setup may ONLY add mail-subdomain MX + a routing rule for
- *  @mail.elkabsula.site; never touch root DNS records, nameservers,
- *  or الكبسولة Workers/routes.
+ *  the NEW account.
+ *  2026-11-17 UPDATE — the original "never touch root DNS" rule got a
+ *  narrow, explicit exception from Mohamed: Email Routing can ONLY
+ *  activate zone-wide, so root MX/SPF/DKIM records were added (with a
+ *  rollback plan: remove them the moment he says they hurt the site)
+ *  and the old Namecheap forwarding MX/SPF were removed. Root mail is
+ *  preserved by the relay forwarding it to FORWARD_TO (see
+ *  src/relay-worker.ts) — the zone has ONE catch-all, so the split
+ *  between temp mail and root mail happens inside the relay, not in
+ *  routing rules.
  *  No .edu domain is listed here on purpose: .edu is restricted to
  *  accredited US postsecondary institutions (EDUCAUSE) and is not
  *  available to an individual / Omani K-12 school. */
 export const DEFAULT_DOMAINS = [
   "mail.elkabsula.site",
 ] as const;
+
+/** Root domain of the zone in the OLD account. Mail to @elkabsula.site
+ *  is Mohamed's own mail (previously delivered by Namecheap email
+ *  forwarding) — the relay forwards it to FORWARD_TO, it is never
+ *  ingested as temp mail. */
+export const ROOT_DOMAIN = "elkabsula.site";
 
 /** Optional public-provider fallback, receive-only (mail.tm).
  *  Shared/public — NOT private, and NOT the primary domain.
