@@ -1,12 +1,1 @@
-{
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
-    "skipLibCheck": true,
-    "lib": ["ESNext"],
-    "types": ["@cloudflare/workers-types", "vitest/globals"]
-  },
-  "include": ["src/**/*", "tests/**/*"]
-}
+{"compilerOptions":{"allowImportingTsExtensions":true,"lib":["ES2022"],"module":"ESNext","moduleResolution":"bundler","noEmit":true,"skipLibCheck":true,"strict":true,"target":"ES2022","types":["@cloudflare/workers-types"]},"include":["src/**/*.ts"]}

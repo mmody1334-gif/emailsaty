@@ -1,16 +1,39 @@
+# emailsaty — Cloudflare Worker config.
+# NEW account only (mmody1330@gmail.com). Do NOT deploy from / to the
+# old Filmaty/SaveLink account.
+#
+# account_id is intentionally NOT hard-coded here. Fill it in (or pass
+# --account-id) on Mohamed's machine after `wrangler login` with the
+# new account, or set CLOUDFLARE_ACCOUNT_ID as a GitHub secret.
+# account_id = "PASTE_NEW_ACCOUNT_ID_HERE"
+
 name = "emailsaty"
-account_id = "0000e4925fd52a263ae76a9053eade14"
-main = "src/index.ts"
-compatibility_date = "2025-09-01"
-workers_dev = true
+main = "src/worker.ts"
+compatibility_date = "2026-11-17"
 
+# D1 database — create once on the new account:
+#   wrangler d1 create emailsaty-db
+# then paste the returned database_id below and run schema.sql.
+[[d1_databases]]
+binding = "DB"
+database_name = "emailsaty-db"
+database_id = "PASTE_D1_DATABASE_ID_HERE"
+
+# Free domain — ONLY mail.elkabsula.site (subdomain of a domain Mohamed
+# already owns — $0 extra). No other primary domain.
+# ⚠️ DNS FLAG: elkabsula.site's zone currently lives in the OLD Cloudflare
+# account. The mail.elkabsula.site subdomain must be set up in the NEW
+# account (mmody1330@gmail.com) — subdomain zone / MX + Email Routing
+# there — before live receiving can be tested. Stage 2 cannot pass
+# until that DNS step is done by Mohamed.
 [vars]
-BOT_TOKEN = "8576873952:AAFD919csZ1CWTKZv-fG5v7J8lGzUYCEtI4"
-PUBLIC_BASE_URL = "https://emailsaty.hudhaifa-bio.workers.dev"
+DOMAINS = "mail.elkabsula.site"
+TELEGRAM_CHAT_ID = "736161596"
 
-[triggers]
-crons = ["* * * * *"]
-
-[[kv_namespaces]]
-binding = "EMAILSATY_STORAGE"
-id = "3f963e74626b4f19a2e4244f85012c57"
+# Secrets (never in this file — set with wrangler secret put):
+#   TELEGRAM_BOT_TOKEN   — token of the new emailsaty Telegram bot
+#
+# Email Routing (dashboard, new account, per domain):
+#   Email -> Email Routing -> Routing rules -> Catch-all -> Send to Worker
+#   Destination worker: emailsaty. Do this for the domain above.
+#   The MX records are then managed by Cloudflare automatically.
