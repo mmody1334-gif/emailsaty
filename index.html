@@ -358,6 +358,10 @@ async function refreshInbox() {
     return;
   }
   let messages;
+  // Show a loading state immediately, so the previous mailbox's
+  // inbox text never lingers under the new mailbox's heading while
+  // the fetch is in flight.
+  $("inboxList").innerHTML = '<p class="muted">جارٍ تحميل رسايل ' + current.address + '…</p>';
   try {
     messages = await fetchMessages(current);
   } catch (e) {
