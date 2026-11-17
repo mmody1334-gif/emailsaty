@@ -9,6 +9,7 @@ import relay from "../src/relay-worker.ts";
 const ENV = {
   INGEST_URL: "https://emailsaty.test.workers.dev/api/ingest",
   INGEST_SECRET: "relay-secret-123",
+  FORWARD_TO: "mmody1334@gmail.com",
 };
 
 const RAW = [
@@ -22,6 +23,7 @@ const RAW = [
 
 function message() {
   let rejected = null;
+  const forwarded = [];
   return {
     msg: {
       to: "relaybox@mail.elkabsula.site",
@@ -29,8 +31,10 @@ function message() {
       headers: new Map([["subject", "Verify your account"]]),
       raw: RAW,
       setReject: (m) => { rejected = m; },
+      forward: async (rcpt) => { forwarded.push(rcpt); return { accepted: true }; },
     },
     get rejected() { return rejected; },
+    forwarded,
   };
 }
 
@@ -94,4 +98,37 @@ test("relay throws when INGEST_URL is still the placeholder", async (t) => {
     () => relay.email(msg, { ...ENV, INGEST_URL: "PLACEHOLDER_INGEST_URL" }),
     /INGEST_URL is not configured/,
   );
+});
+
+test("relay forwards root-domain mail to FORWARD_TO without calling ingest", async (t) => {
+  const calls = stubFetch(t, { ok: true, status: 200 });
+  const m = message();
+  m.msg.to = "info@elkabsula.site";
+  m.msg.raw = RAW.replace("relaybox@mail.elkabsula.site", "info@elkabsula.site");
+  await relay.email(m.msg, ENV);
+  assert.equal(calls.length, 0);
+  assert.deepEqual(m.forwarded, [ENV.FORWARD_TO]);
+  assert.equal(m.rejected, null);
+});
+
+test("relay forwards root mail even for a blocked local part (faithful to old forwarding)", async (t) => {
+  const calls = stubFetch(t, { ok: true, status: 200 });
+  const m = message();
+  m.msg.to = "admin@elkabsula.site";
+  m.msg.raw = RAW.replace("relaybox@mail.elkabsula.site", "admin@elkabsula.site");
+  await relay.email(m.msg, ENV);
+  assert.equal(calls.length, 0);
+  assert.deepEqual(m.forwarded, [ENV.FORWARD_TO]);
+});
+
+test("relay throws for root-domain mail when FORWARD_TO is not set", async (t) => {
+  stubFetch(t, { ok: true, status: 200 });
+  const m = message();
+  m.msg.to = "info@elkabsula.site";
+  m.msg.raw = RAW.replace("relaybox@mail.elkabsula.site", "info@elkabsula.site");
+  await assert.rejects(
+    () => relay.email(m.msg, { ...ENV, FORWARD_TO: "" }),
+    /FORWARD_TO is not configured/,
+  );
+  assert.deepEqual(m.forwarded, []);
 });
