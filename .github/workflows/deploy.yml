@@ -27,7 +27,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Node 24: the tests import the .ts sources directly, which
+          # needs Node's built-in TypeScript type stripping (Node 20
+          # fails with ERR_UNKNOWN_FILE_EXTENSION for .ts imports).
+          node-version: 24
           cache: npm
 
       - run: npm ci
