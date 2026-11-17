@@ -19,11 +19,11 @@ database_id = "d7935a6f-f6be-42f2-8643-945ad6bea548"
 
 # Free domain — ONLY mail.elkabsula.site (subdomain of a domain Mohamed
 # already owns — $0 extra). No other primary domain.
-# ⚠️ DNS FLAG: elkabsula.site's zone currently lives in the OLD Cloudflare
-# account. The mail.elkabsula.site subdomain must be set up in the NEW
-# account (mmody1330@gmail.com) — subdomain zone / MX + Email Routing
-# there — before live receiving can be tested. Stage 2 cannot pass
-# until that DNS step is done by Mohamed.
+# ⚠️ RECEIVING: a mail.elkabsula.site zone cannot be created on a free
+# account (Cloudflare error 1116, subdomain zones are Enterprise-only).
+# Receiving happens in the OLD account (elkabsula.site zone) via Email
+# Routing + the relay Worker (see wrangler-relay.toml); this Worker only
+# stores mail in D1. See README "Relay architecture".
 [vars]
 DOMAINS = "mail.elkabsula.site"
 TELEGRAM_CHAT_ID = "736161596"
@@ -32,8 +32,17 @@ TELEGRAM_CHAT_ID = "736161596"
 #   TELEGRAM_BOT_TOKEN   — DEFERRED (2026-11-17): only set this later
 #   to re-enable Telegram notifications; the Worker skips notify
 #   when it is unset, and the deploy workflow needs no Telegram secret.
+#   INGEST_SECRET       — shared secret for POST /api/ingest. MUST be
+#   the exact same value as INGEST_SECRET on the relay Worker
+#   (wrangler-relay.toml, old account). Generate with:
+#   openssl rand -hex 32   — then `wrangler secret put INGEST_SECRET`
+#   in BOTH accounts. Never put it in this repo.
 #
-# Email Routing (dashboard, new account, per domain):
-#   Email -> Email Routing -> Routing rules -> Catch-all -> Send to Worker
-#   Destination worker: emailsaty. Do this for the domain above.
-#   The MX records are then managed by Cloudflare automatically.
+# Receiving (relay design, 2026-11-17): this Worker does NOT receive
+# mail directly — a mail.elkabsula.site zone cannot exist on a free
+# account (Cloudflare error 1116, subdomain zones are Enterprise-only).
+# The OLD account receives via Email Routing on the elkabsula.site zone
+# and the relay Worker (src/relay-worker.ts) forwards each message to
+# POST /api/ingest here. This Worker's own email() entry is kept as a
+# fallback only. HARD RULE: relay setup must never touch الكبسولة —
+# only mail-subdomain MX + a routing rule for @mail.elkabsula.site.
