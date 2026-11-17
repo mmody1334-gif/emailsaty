@@ -1,0 +1,52 @@
+name: Deploy emailsaty Worker
+
+# Deploys the Cloudflare Worker (src/worker.ts) to the NEW Cloudflare
+# account (mmody1330@gmail.com) — never the old Filmaty/SaveLink account.
+# Secrets are GitHub repo secrets, never hard-coded here or in wrangler.toml.
+# Telegram is DEFERRED: no Telegram secret is required for this workflow;
+# the Worker skips Telegram notify when TELEGRAM_BOT_TOKEN is unset.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'wrangler.toml'
+      - 'schema.sql'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Check D1 database_id is configured
+        run: |
+          if grep -q 'PASTE_D1_DATABASE_ID_HERE' wrangler.toml; then
+            echo "::error::D1 database_id in wrangler.toml is still the placeholder PASTE_D1_DATABASE_ID_HERE. Create the D1 database emailsaty-db on the NEW Cloudflare account first (see README Stage 2 checklist, step 1), paste its id into wrangler.toml, and push again. The workflow does NOT create the D1 database."
+            exit 1
+          fi
+
+      - name: Deploy to Cloudflare Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy
